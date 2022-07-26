@@ -6,6 +6,13 @@ class homePage extends StatefulWidget {
 }
 
 class _homePageState extends State<homePage> {
+  List <String>iconList = [
+    'asset/images/test1.jpg',
+    'asset/images/test2.jpg',
+    'asset/images/test3.jpg',
+    'asset/images/test4.jpg',
+    'asset/images/test5.jpg',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -57,21 +64,42 @@ class _homePageState extends State<homePage> {
               thickness: 1,
               color: Colors.grey,
             ),
-            Container( //목록 스크롤..
+            Container(
               padding: EdgeInsets.only(left: 20, right: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Text('Row $index');
-                      },
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(), //이거 넣으니까 일단 스크롤은 됨..찾아봐야한다.
+                itemCount: iconList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    height: 100,
+                    margin: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(20),
+                      image: DecorationImage(
+                        image: AssetImage(iconList[index]),
+                        fit: BoxFit.fill
+                      )
                     ),
-                  )
-                ],
-              )
+                    child: Container(
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Container(
+                          height: 30,
+                          width: 100,
+                          padding: EdgeInsets.only(top: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                        ),
+                      )
+                    )
+                  );
+                },
+              ),
             )
           ]
         )

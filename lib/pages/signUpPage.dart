@@ -143,7 +143,7 @@ class _signUpPageState extends State<signUpPage> {
                       printMSG()
                     }
                   },
-                  child: const Text("회원가입")
+                  child: Text("회원가입")
                 ),
               ),
             ]
