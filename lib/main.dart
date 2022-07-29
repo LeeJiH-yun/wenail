@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
 import 'package:wenail/pages/signUpPage.dart';
 
 void main() {
+  initializeDateFormatting('ko-KR', null); //기본 언어 초기화
   runApp(const MyApp());
 }
 
@@ -13,7 +15,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       debugShowCheckedModeBanner: false, //우측 상단의 디버그 표시를 없앤다.
       theme: ThemeData(
         primarySwatch: Colors.pink,

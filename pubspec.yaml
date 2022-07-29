@@ -33,6 +33,8 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  table_calendar: ^3.0.6 # 사용할 라이브러리 추가를 하면 상단에 Pub get을 눌러서 설치해줘야한다..!
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +59,7 @@ flutter:
     - asset/images/test3.jpg
     - asset/images/test4.jpg
     - asset/images/test5.jpg
+    - asset/images/test6.jpg
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
