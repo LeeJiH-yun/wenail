@@ -36,8 +36,8 @@ class _reserveState extends State<reservePage> {
           actions: <Widget>[
             new IconButton(
               icon: new Icon(Icons.calendar_today),
-              onPressed: () => {
-
+              onPressed: () => { //달력 새로고침을 위해 넣었는데 수정해야 할 것 같다.
+                Navigator.pushReplacement(context,MaterialPageRoute(builder: (BuildContext context) => super.widget))
               },
             ),
           ]
