@@ -159,7 +159,29 @@ class _reserveState extends State<reservePage> {
               child: Container(
                 margin: EdgeInsets.only(bottom: 10, right: 5),
                 child: InkWell(
-                  onTap: (){},
+                  onTap: (){
+                    print("click");
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: Text("예약신청이 됐습니다.", textAlign: TextAlign.center),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                          backgroundColor: Colors.white,
+                          actions: [
+                            Center(
+                              child: FlatButton(
+                                child: Text("확인"),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              )
+                            )
+                          ],
+                        );
+                      },
+                    );
+                  },
                   child: Container(
                     height: 30,
                     width: 100,
