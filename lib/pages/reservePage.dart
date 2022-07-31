@@ -17,8 +17,14 @@ class _reserveState extends State<reservePage> {
     DateTime.now().day,
   );
   DateTime focusedDay = DateTime.now();
+
   List<Map> timeArray = [{"time": "12:00"}, {"time": "12:30"}, {"time": "13:00"}, {"time": "13:30"}, {"time": "14:00"}, {"time": "14:30"},
   {"time": "15:00"}, {"time": "15:30"}];
+
+  bool _visibility = false, //예약하기 하단바 보여주기 여부
+       _timeVisibility = false; //시간 보여주기 여부
+
+  int selected = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,168 +33,148 @@ class _reserveState extends State<reservePage> {
           title: Text("우리네일"),
           centerTitle: true,
           elevation: 0, //그림자 없애주기
+          actions: <Widget>[
+            new IconButton(
+              icon: new Icon(Icons.calendar_today),
+              onPressed: () => {
+
+              },
+            ),
+          ]
         ),
         body: SingleChildScrollView( //overflow 오류가 나서 추가함
-            scrollDirection: Axis.vertical,
-            child: Column(
-              children: [
-                TableCalendar(
-                  focusedDay: focusedDay, //달력에서 자동으로 보여줄 날
-                  firstDay: DateTime.now(), //오늘 이전 날짜는 선택이 안되게 막는다.
-                  lastDay: DateTime.now().add(Duration(days: 365*10 + 2)),
-                  locale: 'ko-KR',
-                  headerStyle: HeaderStyle(
-                    formatButtonVisible: false,
-                    titleCentered: true,
-                  ),
-                  onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
-                    setState(() {
-                      //선택된 날짜의 상태를 갱신한다.
-                      print(selectedDay);
-                      this.selectedDay = selectedDay;
-                      this.focusedDay = focusedDay;
-                    });
-                  },
-                  selectedDayPredicate: (DateTime day) {
-                    //selectedDay 와 동일한 날짜의 모양을 바꿔준다.
-                    return isSameDay(selectedDay, day);
-                  },
-                  onPageChanged: (focusedDay) {
-                    this.focusedDay = focusedDay;
-                  },
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: [
+              TableCalendar(
+                focusedDay: focusedDay, //달력에서 자동으로 보여줄 날
+                firstDay: DateTime.now(), //오늘 이전 날짜는 선택이 안되게 막는다.
+                lastDay: DateTime.now().add(Duration(days: 365*10 + 2)),
+                locale: 'ko-KR',
+                availableCalendarFormats: const {
+                  CalendarFormat.month: '오늘',
+                  CalendarFormat.twoWeeks: '오늘',
+                },
+                calendarStyle: CalendarStyle(
+                    outsideDaysVisible: false //현재 월의 달력만 보여준다.
                 ),
-                Divider(
-                  thickness: 1,
-                  color: Colors.grey,
+                headerStyle: HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
                 ),
-                Container(
-                  color: Colors.white,
-                  width: MediaQuery.of(context).size.width,
-                  height: 30,
-                  padding: EdgeInsets.all(5),
-                  child: Row(
-                    children: [
-                      Container(
-                        child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 15),
-                        child: Icon(Icons.refresh),
-                      )
-                    ],
-                  )
-                ),
-                Divider(
-                  thickness: 1,
-                  color: Colors.grey,
-                ),
-                Stack(
+                onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
+                  setState(() {
+                    //선택된 날짜의 상태를 갱신한다.
+                    _timeVisibility = true;
+
+                    this.selectedDay = selectedDay;
+                    //this.focusedDay = focusedDay;
+                    if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _timeVisibility) {
+                      //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우
+                      setState(() {
+                        _visibility = false;
+                      });
+                    }
+                  });
+                },
+                selectedDayPredicate: (DateTime day) {
+                  return isSameDay(selectedDay, day);
+                },
+                onPageChanged: (focusedDay) {
+                  setState(() { //달력 월을 넘길 때
+                    _timeVisibility = false;
+                    _visibility = false;
+                  });
+                  this.focusedDay = focusedDay;
+                },
+              ),
+              Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
+              Container(
+                color: Colors.white,
+                width: MediaQuery.of(context).size.width,
+                height: 30,
+                padding: EdgeInsets.all(5),
+                margin: EdgeInsets.only(left: 5),
+                child: Row(
                   children: [
                     Container(
-                      height: 150,
-                      child: Column(
-                        children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: timeArray.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Column(
-                                children: [
-                                  Container(
-                                      child: InkWell(
-                                          onTap: (){},
-                                          child: Align( //글자가 왼쪽으로 정렬이 안되서 추가함
-                                            alignment: Alignment.centerLeft,
-                                            child: Container(
-                                                color: Colors.white,
-                                                padding: EdgeInsets.only(top: 5),
-                                                margin: EdgeInsets.only(left: 8),
-                                                child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 15.0))
-                                            ),
-                                          )
-                                      )
-                                  ),
-                                  Divider(
-                                    thickness: 1,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      )
+                      child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        color: Color(0xffD5D5D5),
-                        height: 50,
-                        width: MediaQuery.of(context).size.width,
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 10, right: 5),
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: InkWell(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
-                              },
-                              child: Container(
-                                  height: 30,
-                                  width: 100,
-                                  padding: EdgeInsets.only(top: 5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.pink,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text('예약하기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
-                              ),
-                            )
-                          )
-                        )
-                      ),
-                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 15),
+                      child: Icon(Icons.refresh),
+                    )
                   ],
                 )
-                // Container(
-                //   child: Column(
-                //     children: [
-                //       ListView.builder(
-                //         shrinkWrap: true,
-                //         physics: NeverScrollableScrollPhysics(),
-                //         itemCount: timeArray.length,
-                //         itemBuilder: (BuildContext context, int index) {
-                //           return Column(
-                //             children: [
-                //               Container(
-                //                   child: InkWell(
-                //                   onTap: (){},
-                //                   child: Align( //글자가 왼쪽으로 정렬이 안되서 추가함
-                //                     alignment: Alignment.centerLeft,
-                //                     child: Container(
-                //                       color: Colors.white,
-                //                       padding: EdgeInsets.only(top: 5),
-                //                       margin: EdgeInsets.only(left: 8),
-                //                       child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 15.0))
-                //                     ),
-                //                   )
-                //                 )
-                //               ),
-                //               Divider(
-                //                 thickness: 1,
-                //                 color: Colors.grey,
-                //               ),
-                //             ],
-                //           );
-                //         },
-                //       ),
-                //     ],
-                //   )
-                // )
+              ),
+              Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
+              Visibility(
+                visible: _timeVisibility,
+                child: Container(
+                  margin: EdgeInsets.all(10),
+                  height: 60,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: timeArray.length,
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            //시간 선택시 예약하기 버튼을 보여준다.
+                            _visibility = true;
+                            selected = index;
+                          });
+                        },
+                        child: Container(
+                            width: 100,
+                            margin: EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: (_visibility && selected == index) ? Colors.transparent : Colors.blue,
+                              border: Border.all(color: Colors.black),
+                            ),
+                            child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center)
+                        )
+                      );
+                    }
+                  )
+                ),
+              ),
             ],
           )
-        )
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Color(0xffD5D5D5),
+          child: Visibility(
+            visible: _visibility,
+            child: Align(
+              heightFactor: 1.2,
+              alignment: Alignment.bottomRight,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 10, right: 5),
+                child: InkWell(
+                  onTap: (){},
+                  child: Container(
+                    height: 30,
+                    width: 100,
+                    padding: EdgeInsets.only(top: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.pink,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text('예약하기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                  ),
+                )
+              )
+            )
+          )
+        ),
     );
   }
 }

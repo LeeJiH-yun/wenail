@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wenail/pages/reservePage.dart';
+import 'package:flutter/services.dart';
 
 class homePage extends StatefulWidget {
   @override
@@ -15,13 +16,12 @@ class _homePageState extends State<homePage> {
     'asset/images/test5.jpg',
     'asset/images/test6.jpg',
   ];
+  DateTime? currentBackPressTime;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope( //메인화면에서 뒤로가기시 로그인화면으로 이동되는 것을 방지
-      onWillPop: () {
-        return Future(() => false);
-      },
+      onWillPop: onWillPop,
       child: Scaffold(
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -78,37 +78,37 @@ class _homePageState extends State<homePage> {
                     itemCount: iconList.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
-                          height: 100,
-                          margin: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              color: Colors.teal,
-                              borderRadius: BorderRadius.circular(20),
-                              image: DecorationImage(
-                                  image: AssetImage(iconList[index]),
-                                  fit: BoxFit.fill
-                              )
-                          ),
-                          child: Container(
-                              child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child:
-                                  InkWell(
-                                    onTap: (){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
-                                    },
-                                    child: Container(
-                                        height: 30,
-                                        width: 100,
-                                        padding: EdgeInsets.only(top: 5),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
-                                    ),
-                                  )
-                              )
+                        height: 100,
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                              image: AssetImage(iconList[index]),
+                              fit: BoxFit.fill
                           )
+                        ),
+                        child: Container(
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child:
+                            InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
+                              },
+                              child: Container(
+                                  height: 30,
+                                  width: 100,
+                                  padding: EdgeInsets.only(top: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                              ),
+                            )
+                          )
+                        )
                       );
                     },
                   ),
@@ -118,5 +118,18 @@ class _homePageState extends State<homePage> {
         ),
       )
     );
+  }
+  Future<bool> onWillPop() async {
+    DateTime now = DateTime.now();
+
+    if (currentBackPressTime == null || now.difference(currentBackPressTime!) > Duration(seconds: 2)) {
+      currentBackPressTime = now;
+      final _message = "뒤로 버튼을 한 번 더 누르면 종료됩니다.";
+      final snackBar = SnackBar(content: Text(_message));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return false;
+    }
+    SystemNavigator.pop(); //앱 종료
+    return true;
   }
 }
