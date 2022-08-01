@@ -160,7 +160,6 @@ class _reserveState extends State<reservePage> {
                 margin: EdgeInsets.only(bottom: 10, right: 5),
                 child: InkWell(
                   onTap: (){
-                    print("click");
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
