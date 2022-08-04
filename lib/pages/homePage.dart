@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wenail/pages/reservePage.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert'; //JSON데이터 사용해서 가져옴
+import 'package:http/http.dart' as http;
 
 class homePage extends StatefulWidget {
   @override
@@ -17,6 +19,8 @@ class _homePageState extends State<homePage> {
     'asset/images/test6.jpg',
   ];
   DateTime? currentBackPressTime;
+  List data = [];
+  TextEditingController _editingController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,34 +40,32 @@ class _homePageState extends State<homePage> {
               ),
               SizedBox(height: 15.0),
               Container(
-                  padding: EdgeInsets.only(left: 20, right: 20),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 300,
-                        child: TextFormField(
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              hintText: "네일샵 검색",
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.all(8)
-                          ),
+                padding: EdgeInsets.only(left: 20, right: 20),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        controller: _editingController,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          hintText: "네일샵 검색",
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.all(8)
                         ),
                       ),
-                      Container(
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        getJSONData();
+                      },
+                      child: Container(
                         margin: EdgeInsets.only(left: 15),
                         child: Icon(Icons.search, size: 45.0),
-                      ),
-                      // ElevatedButton.icon( //검색버튼 2번째 방법
-                      //   onPressed: () => {},
-                      //   icon: Icon(Icons.search_sharp),
-                      //   label: Text(""),
-                      //   style: ElevatedButton.styleFrom(
-                      //     fixedSize: Size(50, 50),
-                      //   ),
-                      // )
-                    ],
-                  )
+                      )
+                    )
+                  ],
+                )
               ),
               SizedBox(height: 13.0),
               Divider(
@@ -72,46 +74,51 @@ class _homePageState extends State<homePage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 20, right: 20),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(), //이거 넣으니까 일단 스크롤은 됨..찾아봐야한다.
-                  itemCount: iconList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      height: 100,
-                      margin: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.teal,
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
+                child: data!.length == 0 ?
+                  Container(
+                    child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+                  ) :
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(), //이거 넣으니까 일단 스크롤은 됨..찾아봐야한다.
+                    itemCount: iconList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        height: 100,
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
                             image: AssetImage(iconList[index]),
                             fit: BoxFit.fill
-                        )
-                      ),
-                      child: Container(
-                        child: Align(
-                          alignment: Alignment.bottomRight,
-                          child:
-                          InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
-                            },
-                            child: Container(
-                                height: 30,
-                                width: 100,
-                                padding: EdgeInsets.only(top: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
-                            ),
+                          )
+                        ),
+                        child: Container(
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child:
+                            InkWell(
+                              onTap: (){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
+                              },
+                              child: Container(
+                                  height: 30,
+                                  width: 100,
+                                  padding: EdgeInsets.only(top: 5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                              ),
+                            )
                           )
                         )
-                      )
-                    );
-                  },
-                ),
+                      );
+                    },
+                  )
+
               )
             ]
           )
@@ -131,5 +138,16 @@ class _homePageState extends State<homePage> {
     }
     SystemNavigator.pop(); //앱 종료
     return true;
+  }
+  Future<String> getJSONData() async { //검색했을 때 데이터가 조회되도록
+    var url = "내로컬주소로 해야하나 rest주소로 해야하나 ? target=store&query=${_editingController}";
+    var response = await http.get(Uri.parse(url));
+
+    setState(() {
+      var dataConvertedToJSON = json.decode(response.body);
+      List result = dataConvertedToJSON["document"];
+      data!.addAll(result);
+    });
+    return response.body;
   }
 }

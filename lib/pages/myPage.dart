@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:convert'; //JSON데이터 사용해서 가져옴
+import 'package:http/http.dart' as http;
 
 class myPage extends StatefulWidget {
   @override
@@ -16,12 +18,13 @@ class _myPageState extends State<myPage> {
     "2022.07.26 12:30 - 안산 우리네일 (예약확정)"
   ];
   DateTime? currentBackPressTime;
+  List data = [];
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope( //메인화면에서 뒤로가기시 로그인화면으로 이동되는 것을 방지
-        onWillPop: onWillPop,
-        child: Scaffold(
+      onWillPop: onWillPop,
+      child: Scaffold(
         resizeToAvoidBottomInset : false,
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -77,70 +80,74 @@ class _myPageState extends State<myPage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 20, right: 20),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: reserveArray.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      height: 40,
-                      margin: EdgeInsets.only(top: 10),
-                      decoration: BoxDecoration(
-                        color: Color(0xffD5D5D5),
-                        borderRadius: BorderRadius.circular(13),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.only(left: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              child: Text(reserveArrayT[index]),
-                            ),
-                            Container(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: InkWell(
-                                  onTap: (){
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          content: Text("예약을 취소하겠습니까?", textAlign: TextAlign.center),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                                          backgroundColor: Colors.white,
-                                          actions: [
-                                            FlatButton(
-                                              child: Text("취소"),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                            FlatButton(
-                                              child: Text("확인"),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 35,
-                                    padding: EdgeInsets.all(8),
-                                    child: Text('취소하기', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
-                                  ),
+                child: data!.length == 0 ?
+                  Container(
+                      child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+                  ) :
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: reserveArray.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        height: 40,
+                        margin: EdgeInsets.only(top: 10),
+                        decoration: BoxDecoration(
+                          color: Color(0xffD5D5D5),
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: Container(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                child: Text(reserveArrayT[index]),
+                              ),
+                              Container(
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: InkWell(
+                                    onTap: (){
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            content: Text("예약을 취소하겠습니까?", textAlign: TextAlign.center),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                                            backgroundColor: Colors.white,
+                                            actions: [
+                                              FlatButton(
+                                                child: Text("취소"),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                              FlatButton(
+                                                child: Text("확인"),
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Container(
+                                      height: 35,
+                                      padding: EdgeInsets.all(8),
+                                      child: Text('취소하기', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
+                                    ),
+                                  )
                                 )
                               )
-                            )
-                          ],
-                        ),
-                      )
-                    );
-                  }
+                            ],
+                          ),
+                        )
+                      );
+                    }
+                  )
                 )
-              )
             ]
           )
         )
@@ -159,5 +166,17 @@ class _myPageState extends State<myPage> {
     }
     SystemNavigator.pop(); //앱 종료
     return true;
+  }
+
+  Future<String> getJSONData() async { //검색했을 때 데이터가 조회되도록
+    var url = "내로컬주소로 해야하나 rest주소로 해야하나 ? target=store&query=userNo";
+    var response = await http.get(Uri.parse(url));
+
+    setState(() {
+      var dataConvertedToJSON = json.decode(response.body);
+      List result = dataConvertedToJSON["document"];
+      data!.addAll(result);
+    });
+    return response.body;
   }
 }

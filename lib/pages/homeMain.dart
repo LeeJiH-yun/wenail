@@ -23,7 +23,10 @@ class _homeMainState extends State<homeMain> {
       appBar: AppBar(
         title: Text("우리네일"),
         centerTitle: true,
-        automaticallyImplyLeading: false //화살표 삭제
+        automaticallyImplyLeading: false, //화살표 삭제
+        actions: [
+          IconButton(icon: Icon(Icons.logout), onPressed: () {Navigator.pop(context);}),
+        ],
       ),
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
 import 'package:wenail/pages/signUpPage.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   initializeDateFormatting('ko-KR', null); //기본 언어 초기화
@@ -107,9 +108,10 @@ class MainHomeState extends State<MainHome> {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
-                    onPressed: () => {
+                    onPressed: () async {
                       //if (_formKey.currentState!.validate()) {
-                        Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()))
+                        //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()))
+                        _postRequest();
                       //}
                     },
                     child: const Text("로그인")
@@ -154,6 +156,21 @@ class MainHomeState extends State<MainHome> {
           ),
         )
       )
+    );
+  }
+
+  _postRequest() async {
+    String url = 'http://example.com/login';
+
+    http.Response response = await http.post(
+      url,
+      headers: <String, String> {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: <String, String> {
+        'user_id': 'user_id_value',
+        'user_pwd': 'user_pwd_value'
+      },
     );
   }
 }
