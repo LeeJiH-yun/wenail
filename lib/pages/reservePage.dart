@@ -21,10 +21,19 @@ class _reserveState extends State<reservePage> {
   List<Map> timeArray = [{"time": "12:00"}, {"time": "12:30"}, {"time": "13:00"}, {"time": "13:30"}, {"time": "14:00"}, {"time": "14:30"},
   {"time": "15:00"}, {"time": "15:30"}];
 
+  List<Map> goodsArray = [
+    {"goods_image": "", "goods_name": "손케어", "price": "20,000", "content": "손 정리"},
+    {"goods_image": "", "goods_name": "발케어", "price": "30,000", "content": "발 정리"},
+    {"goods_image": "", "goods_name": "젤네일", "price": "50,000", "content": "젤 네일입니다"},
+    {"goods_image": "", "goods_name": "젤패디", "price": "60,000", "content": "젤 패디입니다"}
+  ];
+
   bool _visibility = false, //예약하기 하단바 보여주기 여부
+       _goodsVisibility = false, //상품목록 보여주기 여부
        _timeVisibility = false; //시간 보여주기 여부
 
-  int selected = 0;
+  int timeSelected = 0,
+      goodsSelected = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +74,7 @@ class _reserveState extends State<reservePage> {
                 onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
                   setState(() {
                     //선택된 날짜의 상태를 갱신한다.
-                    _timeVisibility = true;
+                    _goodsVisibility = true;
 
                     this.selectedDay = selectedDay;
                     //this.focusedDay = focusedDay;
@@ -73,6 +82,11 @@ class _reserveState extends State<reservePage> {
                       //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우
                       setState(() {
                         _visibility = false;
+                      });
+                    }
+                    if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _goodsVisibility) {
+                      setState(() {
+                        _timeVisibility = false;
                       });
                     }
                   });
@@ -83,6 +97,7 @@ class _reserveState extends State<reservePage> {
                 onPageChanged: (focusedDay) {
                   setState(() { //달력 월을 넘길 때
                     _timeVisibility = false;
+                    _goodsVisibility = false;
                     _visibility = false;
                   });
                   this.focusedDay = focusedDay;
@@ -92,59 +107,23 @@ class _reserveState extends State<reservePage> {
                 thickness: 1,
                 color: Colors.grey,
               ),
-              Container(
-                color: Colors.white,
-                width: MediaQuery.of(context).size.width,
-                height: 30,
-                padding: EdgeInsets.all(5),
-                margin: EdgeInsets.only(left: 5),
-                child: Row(
-                  children: [
-                    Container(
-                      child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 15),
-                      child: Icon(Icons.refresh),
-                    )
-                  ],
-                )
-              ),
+              goodsTitle(), //상품선택 타이틀
               Divider(
                 thickness: 1,
                 color: Colors.grey,
               ),
-              Visibility(
+              Visibility(  //상품 목록
+                visible: _goodsVisibility,
+                child: goodsList()
+              ),
+              timesTitle(), //시간선택 타이틀
+              Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
+              Visibility(  //시간 목록
                 visible: _timeVisibility,
-                child: Container(
-                  margin: EdgeInsets.all(10),
-                  height: 60,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: timeArray.length,
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            //시간 선택시 예약하기 버튼을 보여준다.
-                            _visibility = true;
-                            selected = index;
-                          });
-                        },
-                        child: Container(
-                            width: 100,
-                            margin: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: (_visibility && selected == index) ? Colors.transparent : Colors.blue,
-                              border: Border.all(color: Colors.black),
-                            ),
-                            child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center)
-                        )
-                      );
-                    }
-                  )
-                ),
+                child: timesList()
               ),
             ],
           )
@@ -196,6 +175,117 @@ class _reserveState extends State<reservePage> {
             )
           )
         ),
+    );
+  }
+
+  Container goodsTitle() { //상품 선택
+    return Container(
+      color: Colors.white,
+      width: MediaQuery.of(context).size.width,
+      height: 30,
+      padding: EdgeInsets.all(5),
+      margin: EdgeInsets.only(left: 5),
+      child: Row(
+        children: [
+          Container(
+            child:Text('상품선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 15),
+            child: Icon(Icons.refresh),
+          )
+        ],
+      )
+    );
+  }
+
+  Container goodsList() { //상품 목록
+    return Container(
+      margin: EdgeInsets.all(10),
+      height: 80,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: goodsArray.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              setState(() {
+                //상품선택시 시간 목록을 보여준다.
+                _timeVisibility = true;
+                goodsSelected = index;
+              });
+            },
+            child: Container(
+              width: 100,
+              margin: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: (_timeVisibility && goodsSelected == index) ? Colors.transparent : Colors.blue,
+                border: Border.all(color: Colors.black),
+              ),
+              child: Column(
+                children: [
+                  Text(goodsArray[index]["goods_name"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+                  Text(goodsArray[index]["price"], style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
+                ],
+              )
+            )
+          );
+        }
+      )
+    );
+  }
+
+  Container timesTitle() { //시간선택 타이틀
+    return Container(
+      color: Colors.white,
+      width: MediaQuery.of(context).size.width,
+      height: 30,
+      padding: EdgeInsets.all(5),
+      margin: EdgeInsets.only(left: 5),
+      child: Row(
+        children: [
+          Container(
+            child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 15),
+            child: Icon(Icons.refresh),
+          )
+        ],
+      )
+    );
+  }
+
+  Container timesList() { //시간 목록
+    return Container(
+      margin: EdgeInsets.all(10),
+      height: 60,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: timeArray.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              setState(() {
+                //시간 선택시 예약하기 버튼을 보여준다.
+                _visibility = true;
+                timeSelected = index;
+              });
+            },
+            child: Container(
+                width: 100,
+                margin: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: (_visibility && timeSelected == index) ? Colors.transparent : Colors.blue,
+                  border: Border.all(color: Colors.black),
+                ),
+                child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center)
+            )
+          );
+        }
+      )
     );
   }
 }

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
+import 'package:wenail/pages/idSearchPage.dart';
 import 'package:wenail/pages/signUpPage.dart';
 import 'package:http/http.dart' as http;
 
@@ -35,13 +38,17 @@ class MainHomeState extends State<MainHome> {
   var _isChecked = false;
   String _inputId = '', _inputPw = '';
 
+  bool _isLoading = false;
+  TextEditingController idController = new TextEditingController();
+  TextEditingController pwController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         padding: EdgeInsets.fromLTRB(20, 120, 20, 120),
-        child: Form(
+        child: _isLoading ? Center(child: CircularProgressIndicator()) : Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
@@ -50,6 +57,7 @@ class MainHomeState extends State<MainHome> {
               ),
               SizedBox(height: 45.0), //사이 공백
               TextFormField( //값을 입력받을 수 있는 폼
+                controller: idController,
                 keyboardType: TextInputType.text,
                 onSaved: (value) {
                   setState(() {
@@ -69,6 +77,7 @@ class MainHomeState extends State<MainHome> {
               ),
               SizedBox(height: 13.0), //사이 공백
               TextFormField(
+                controller: pwController,
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true, //비밀번호 별표 처리하기
                 onSaved: (value) {
@@ -110,8 +119,12 @@ class MainHomeState extends State<MainHome> {
                 child: ElevatedButton(
                     onPressed: () async {
                       //if (_formKey.currentState!.validate()) {
-                        //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()))
-                        _postRequest();
+                        Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+                        //_postRequest();
+                      // setState(() { //로딩도는거 수정해야함
+                      //   _isLoading = true;
+                      // });
+                      //signIn(idController.text, pwController.text);
                       //}
                     },
                     child: const Text("로그인")
@@ -134,8 +147,13 @@ class MainHomeState extends State<MainHome> {
                         thickness: 1,
                         color: Colors.orange,
                       ),
-                      Container(
-                        child: Text("아이디찾기"),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => idSearch()));
+                        },
+                        child: Container(
+                          child: Text("아이디찾기"),
+                        ),
                       ),
                       VerticalDivider(
                         thickness: 1,
@@ -156,21 +174,6 @@ class MainHomeState extends State<MainHome> {
           ),
         )
       )
-    );
-  }
-
-  _postRequest() async {
-    String url = 'http://example.com/login';
-
-    http.Response response = await http.post(
-      url,
-      headers: <String, String> {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: <String, String> {
-        'user_id': 'user_id_value',
-        'user_pwd': 'user_pwd_value'
-      },
     );
   }
 }

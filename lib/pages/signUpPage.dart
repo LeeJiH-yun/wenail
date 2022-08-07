@@ -31,8 +31,6 @@ class _signUpPageState extends State<signUpPage> {
               new FlatButton(
                 child: new Text("확인"),
                 onPressed: () {
-                  print("Test?");
-                  print(_inputId); // 저장된 값이 출력된다.
                   Navigator.pop(context);
                 },
               ),
@@ -56,6 +54,36 @@ class _signUpPageState extends State<signUpPage> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              TextFormField(
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "이름은 필수입니다.";
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                    hintText: "이름",
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.all(10)
+                ),
+              ),
+              SizedBox(height: 13.0),
+              TextFormField(
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "전화번호는 필수입니다.";
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                    hintText: "전화번호",
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.all(10)
+                ),
+              ),
+              SizedBox(height: 13.0),
               Row(
                 children: [
                   SizedBox(
