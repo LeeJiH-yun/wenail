@@ -186,13 +186,21 @@ class _reserveState extends State<reservePage> {
       padding: EdgeInsets.all(5),
       margin: EdgeInsets.only(left: 5),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            child:Text('상품선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+              child: Row(
+              children: [
+                Text('상품선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+                Container(
+                  margin: EdgeInsets.only(left: 10),
+                  child: Icon(Icons.refresh),
+                ),
+              ],
+            ),
           ),
           Container(
-            margin: EdgeInsets.only(left: 15),
-            child: Icon(Icons.refresh),
+            child: Text('항목을 길게 터치하면 설명을 볼 수 있습니다!',style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Color(0xffFFA7A7))),
           )
         ],
       )
@@ -213,6 +221,9 @@ class _reserveState extends State<reservePage> {
                 //상품선택시 시간 목록을 보여준다.
                 _timeVisibility = true;
                 goodsSelected = index;
+                if (_visibility) { //시간이 선택되어있다면 다른 상품 선택시 초기화 시키도록 함
+                  _visibility = false;
+                }
               });
             },
             child: Container(
@@ -223,11 +234,15 @@ class _reserveState extends State<reservePage> {
                 color: (_timeVisibility && goodsSelected == index) ? Colors.transparent : Colors.blue,
                 border: Border.all(color: Colors.black),
               ),
-              child: Column(
-                children: [
-                  Text(goodsArray[index]["goods_name"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
-                  Text(goodsArray[index]["price"], style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
-                ],
+              child: Tooltip(
+                message: goodsArray[index]["content"],
+                //triggerMode: TooltipTriggerMode.tap, //한 번 선택시 내용이 나오지만 클릭 이벤트가 안먹힘
+                child: Column(
+                  children: [
+                    Text(goodsArray[index]["goods_name"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+                    Text(goodsArray[index]["price"], style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
+                  ],
+                ),
               )
             )
           );
@@ -249,7 +264,7 @@ class _reserveState extends State<reservePage> {
             child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
           ),
           Container(
-            margin: EdgeInsets.only(left: 15),
+            margin: EdgeInsets.only(left: 10),
             child: Icon(Icons.refresh),
           )
         ],
