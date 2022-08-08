@@ -5,9 +5,13 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
 import 'package:wenail/pages/idSearchPage.dart';
 import 'package:wenail/pages/signUpPage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   initializeDateFormatting('ko-KR', null); //기본 언어 초기화
   runApp(const MyApp());
 }
@@ -120,6 +124,8 @@ class MainHomeState extends State<MainHome> {
                     onPressed: () async {
                       //if (_formKey.currentState!.validate()) {
                         Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+                        var token = await FirebaseMessaging.instance.getToken();
+                        print("token : ${token ?? 'token NULL!'}");
                         //_postRequest();
                       // setState(() { //로딩도는거 수정해야함
                       //   _isLoading = true;

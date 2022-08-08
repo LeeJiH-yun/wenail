@@ -56,6 +56,7 @@ class _myPageState extends State<myPage> {
                               Container(
                                 child: Text("이지현", style: TextStyle(fontSize: 17.0)),
                               ),
+                              SizedBox(height: 13.0),
                               Container(
                                 child: Text("내정보수정하기", style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff8C8C8C))),
                               )
