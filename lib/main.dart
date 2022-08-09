@@ -43,8 +43,20 @@ class MainHomeState extends State<MainHome> {
   String _inputId = '', _inputPw = '';
 
   bool _isLoading = false;
+
   TextEditingController idController = new TextEditingController();
   TextEditingController pwController = new TextEditingController();
+
+  void _startLoading() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await Future.delayed(const Duration(seconds:2));
+    setState(() {
+      _isLoading = false;
+      Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +64,7 @@ class MainHomeState extends State<MainHome> {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         padding: EdgeInsets.fromLTRB(20, 120, 20, 120),
-        child: _isLoading ? Center(child: CircularProgressIndicator()) : Form(
+        child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
@@ -123,17 +135,12 @@ class MainHomeState extends State<MainHome> {
                 child: ElevatedButton(
                     onPressed: () async {
                       //if (_formKey.currentState!.validate()) {
-                        Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
                         var token = await FirebaseMessaging.instance.getToken();
                         print("token : ${token ?? 'token NULL!'}");
-                        //_postRequest();
-                      // setState(() { //로딩도는거 수정해야함
-                      //   _isLoading = true;
-                      // });
-                      //signIn(idController.text, pwController.text);
+                        _isLoading ? null : _startLoading();
                       //}
                     },
-                    child: const Text("로그인")
+                    child: _isLoading ? CircularProgressIndicator(color: Color(0xffEAEAEA), strokeWidth: 3.0) : Text("로그인")
                 ),
               ),
               SizedBox(height: 5.0), //사이 공백
