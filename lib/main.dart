@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false, //우측 상단의 디버그 표시를 없앤다.
       theme: ThemeData(
-        primarySwatch: Colors.pink,
+        primarySwatch: Colors.brown,
       ),
       home: MainHome(),
     );
@@ -40,11 +40,10 @@ class MainHome extends StatefulWidget {
 class MainHomeState extends State<MainHome> {
   final _formKey = GlobalKey<FormState>();
   var _isChecked = false;
-  String _inputId = '', _inputPw = '';
-
   bool _isLoading = false;
 
-  TextEditingController idController = new TextEditingController();
+  //특정 이벤트가 발생하였을 때, 현재 입력된 값에 접근하고 싶을 때 TextEditingController 사용.
+  TextEditingController idController = new TextEditingController(); //
   TextEditingController pwController = new TextEditingController();
 
   void _startLoading() async {
@@ -75,11 +74,6 @@ class MainHomeState extends State<MainHome> {
               TextFormField( //값을 입력받을 수 있는 폼
                 controller: idController,
                 keyboardType: TextInputType.text,
-                onSaved: (value) {
-                  setState(() {
-                    _inputId = value as String;
-                  });
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "아이디는 필수입니다.";
@@ -96,11 +90,6 @@ class MainHomeState extends State<MainHome> {
                 controller: pwController,
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true, //비밀번호 별표 처리하기
-                onSaved: (value) {
-                  setState(() {
-                    _inputPw = value as String;
-                  });
-                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "비밀번호는 필수입니다.";
@@ -135,12 +124,12 @@ class MainHomeState extends State<MainHome> {
                 child: ElevatedButton(
                     onPressed: () async {
                       //if (_formKey.currentState!.validate()) {
-                        var token = await FirebaseMessaging.instance.getToken();
+                        var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하가
                         print("token : ${token ?? 'token NULL!'}");
                         _isLoading ? null : _startLoading();
                       //}
                     },
-                    child: _isLoading ? CircularProgressIndicator(color: Color(0xffEAEAEA), strokeWidth: 3.0) : Text("로그인")
+                    child: _isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : Text("로그인", style: TextStyle(color: Color(0xffF7D6AD)))
                 ),
               ),
               SizedBox(height: 5.0), //사이 공백

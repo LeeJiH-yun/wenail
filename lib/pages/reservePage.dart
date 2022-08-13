@@ -39,7 +39,7 @@ class _reserveState extends State<reservePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar (
-          title: Text("우리네일"),
+          title: Text("우리네일", style: TextStyle(color: Color(0xffF7D6AD))),
           centerTitle: true,
           elevation: 0, //그림자 없애주기
           actions: <Widget>[
@@ -60,12 +60,17 @@ class _reserveState extends State<reservePage> {
                 firstDay: DateTime.now(), //오늘 이전 날짜는 선택이 안되게 막는다.
                 lastDay: DateTime.now().add(Duration(days: 365*10 + 2)),
                 locale: 'ko-KR',
-                availableCalendarFormats: const {
-                  CalendarFormat.month: '오늘',
-                  CalendarFormat.twoWeeks: '오늘',
-                },
+                calendarBuilders: CalendarBuilders( //일요일에 빨간 표시
+                  dowBuilder: (context, day) {
+                    if (day.weekday == DateTime.sunday) {
+                      return Center(
+                        child: Text("일",style: TextStyle(color: Colors.red))
+                      );
+                    }
+                  }
+                ),
                 calendarStyle: CalendarStyle(
-                    outsideDaysVisible: false //현재 월의 달력만 보여준다.
+                  outsideDaysVisible: false //현재 월의 달력만 보여준다.
                 ),
                 headerStyle: HeaderStyle(
                   formatButtonVisible: false,
@@ -143,13 +148,13 @@ class _reserveState extends State<reservePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          content: Text("예약신청이 됐습니다.", textAlign: TextAlign.center),
+                          content: Text("예약신청이 됐습니다.", style: TextStyle(color: Color(0xff312B28)), textAlign: TextAlign.center),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                           backgroundColor: Colors.white,
                           actions: [
                             Center(
                               child: FlatButton(
-                                child: Text("확인"),
+                                child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
@@ -165,10 +170,10 @@ class _reserveState extends State<reservePage> {
                     width: 100,
                     padding: EdgeInsets.only(top: 8),
                     decoration: BoxDecoration(
-                      color: Colors.pink,
+                      color: Colors.brown,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text('예약하기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                    child: Text('예약하기', style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
                   ),
                 )
               )
@@ -191,7 +196,7 @@ class _reserveState extends State<reservePage> {
           Container(
               child: Row(
               children: [
-                Text('상품선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+                Text('상품선택',style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
                 Container(
                   margin: EdgeInsets.only(left: 10),
                   child: Icon(Icons.refresh),
@@ -200,7 +205,7 @@ class _reserveState extends State<reservePage> {
             ),
           ),
           Container(
-            child: Text('항목을 길게 터치하면 설명을 볼 수 있습니다!',style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Color(0xffFFA7A7))),
+            child: Text('항목을 길게 터치하면 설명을 볼 수 있습니다!',style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.brown)),
           )
         ],
       )
@@ -261,7 +266,7 @@ class _reserveState extends State<reservePage> {
       child: Row(
         children: [
           Container(
-            child:Text('시간선택',style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+            child:Text('시간선택',style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
           ),
           Container(
             margin: EdgeInsets.only(left: 10),

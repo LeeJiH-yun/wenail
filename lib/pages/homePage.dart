@@ -74,10 +74,10 @@ class _homePageState extends State<homePage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 20, right: 20),
-                child: data!.length == 0 ?
-                  Container(
-                    child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
-                  ) :
+                child: //data!.length == 0 ?
+                  // Container(
+                  //   child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+                  // ) :
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(), //이거 넣으니까 일단 스크롤은 됨..찾아봐야한다.
@@ -107,10 +107,10 @@ class _homePageState extends State<homePage> {
                                   width: 100,
                                   padding: EdgeInsets.only(top: 8),
                                   decoration: BoxDecoration(
-                                    color: Colors.black,
+                                    color: Color(0xFF06E4235),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Text('예약하러가기', style: TextStyle(color: Colors.white), textAlign: TextAlign.center)
+                                  child: Text('예약하러가기', style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
                               ),
                             )
                           )

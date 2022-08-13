@@ -21,7 +21,7 @@ class _homeMainState extends State<homeMain> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("우리네일"),
+        title: Text("우리네일", style: TextStyle(color: Color(0xffF7D6AD))),
         centerTitle: true,
         automaticallyImplyLeading: false, //화살표 삭제
         actions: [
@@ -32,6 +32,7 @@ class _homeMainState extends State<homeMain> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
+        fixedColor: Colors.brown,
         items: [
           BottomNavigationBarItem(
             label: "Home",

@@ -12,7 +12,7 @@ class _idSearchState extends State<idSearch> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("아이디찾기"),
+        title: Text("아이디찾기", style: TextStyle(color: Color(0xffF7D6AD))),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -46,7 +46,7 @@ class _idSearchState extends State<idSearch> {
                     _visibility = true;
                   });
                 },
-                child: const Text("인증번호 전송")
+                child: Text("인증번호 전송", style: TextStyle(color: Color(0xffF7D6AD)))
               ),
             ),
             SizedBox(height: 13.0),
@@ -104,10 +104,10 @@ class _idSearchState extends State<idSearch> {
               );
             });
           },
-          child: Text("인증완료"),
+          child: Text("인증완료", style: TextStyle(color: Color(0xffF7D6AD))),
           style: ElevatedButton.styleFrom(
             fixedSize: Size(90, 40),
-            primary: Colors.deepOrange,
+            primary: Colors.brown,
           ),
         )
       ],

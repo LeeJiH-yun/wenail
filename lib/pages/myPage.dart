@@ -54,7 +54,7 @@ class _myPageState extends State<myPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                child: Text("이지현", style: TextStyle(fontSize: 17.0)),
+                                child: Text("이지현", style: TextStyle(fontSize: 17.0, color: Color(0xff312B28))),
                               ),
                               SizedBox(height: 10.0),
                               Container(
@@ -77,7 +77,7 @@ class _myPageState extends State<myPage> {
                 margin: EdgeInsets.only(left: 5, right: 5),
                 width: MediaQuery.of(context).size.width,
                 height: 50,
-                child: Text("예약현황", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                child: Text("예약현황", style: TextStyle(color: Color(0xff312B28), fontSize: 20.0, fontWeight: FontWeight.bold)),
               ),
               Container(
                 padding: EdgeInsets.only(left: 20, right: 20),
