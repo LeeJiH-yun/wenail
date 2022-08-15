@@ -25,12 +25,11 @@ class _myPageState extends State<myPage> {
     return WillPopScope( //메인화면에서 뒤로가기시 로그인화면으로 이동되는 것을 방지
       onWillPop: onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset : false,
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          padding: EdgeInsets.only(top: 10),
           child: Column(
             children: <Widget>[
+              appTitle(),
               Container(
                 height: 100,
                 padding: EdgeInsets.all(10),
@@ -81,10 +80,10 @@ class _myPageState extends State<myPage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 20, right: 20),
-                child: data!.length == 0 ?
+                child: /*data!.length == 0 ?
                   Container(
                       child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
-                  ) :
+                  ) :*/
                   ListView.builder(
                     shrinkWrap: true,
                     itemCount: reserveArray.length,
@@ -109,30 +108,7 @@ class _myPageState extends State<myPage> {
                                   alignment: Alignment.centerRight,
                                   child: InkWell(
                                     onTap: (){
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            content: Text("예약을 취소하겠습니까?", textAlign: TextAlign.center),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                                            backgroundColor: Colors.white,
-                                            actions: [
-                                              FlatButton(
-                                                child: Text("취소"),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                              FlatButton(
-                                                child: Text("확인"),
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
+                                      alarmMsg("예약을 취소하겠습니까?", "RC");
                                     },
                                     child: Container(
                                       height: 35,
@@ -155,6 +131,75 @@ class _myPageState extends State<myPage> {
       )
     );
   }
+
+  Container appTitle() {//앱 타이틀
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 45,
+      padding: EdgeInsets.only(left: 10, right: 10),
+      margin: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.brown.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+              child: Text("우리네일", style: TextStyle(color: Color(0xffF7D6AD), fontSize: 17))
+          ),
+          SizedBox(width: 110),
+          IconButton(
+            color: Color(0xffF7D6AD),
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () {
+              alarmMsg("로그아웃 하겠습니까?", "LO");
+            }
+          )
+        ]
+      )
+    );
+  }
+
+  void alarmMsg(text, type) { //예약취소 알림창: RC, 로그아웃 알림창: LO
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(text, textAlign: TextAlign.center),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          backgroundColor: Colors.white,
+          actions: [
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    child: Text("취소"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    }
+                  ),
+                  TextButton(
+                    child: Text("확인"),
+                    onPressed: () {
+                      if ("RC" == type) { //예약취소인 경우
+                        Navigator.pop(context);
+                      }
+                      else { //로그아웃인 경우
+                        Navigator.pop(context);
+                      }
+                    }
+                  ),
+                ],
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   Future<bool> onWillPop() async {
     DateTime now = DateTime.now();
 

@@ -43,8 +43,8 @@ class _reserveState extends State<reservePage> {
           centerTitle: true,
           elevation: 0, //그림자 없애주기
           actions: <Widget>[
-            new IconButton(
-              icon: new Icon(Icons.calendar_today),
+            IconButton(
+              icon: Icon(Icons.calendar_today),
               onPressed: () => { //달력 새로고침을 위해 넣었는데 수정해야 할 것 같다.
                 Navigator.pushReplacement(context,MaterialPageRoute(builder: (BuildContext context) => super.widget))
               },
@@ -153,7 +153,7 @@ class _reserveState extends State<reservePage> {
                           backgroundColor: Colors.white,
                           actions: [
                             Center(
-                              child: FlatButton(
+                              child: TextButton(
                                 child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
                                 onPressed: () {
                                   Navigator.pop(context);

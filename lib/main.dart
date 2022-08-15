@@ -8,6 +8,7 @@ import 'package:wenail/pages/signUpPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,17 +44,49 @@ class MainHomeState extends State<MainHome> {
   bool _isLoading = false;
 
   //특정 이벤트가 발생하였을 때, 현재 입력된 값에 접근하고 싶을 때 TextEditingController 사용.
-  TextEditingController idController = new TextEditingController(); //
-  TextEditingController pwController = new TextEditingController();
+  TextEditingController idController = TextEditingController();
+  TextEditingController pwController = TextEditingController();
 
-  void _startLoading() async {
+  void _startLoading(codeNum) async {
     setState(() {
-      _isLoading = true;
-    });
-    await Future.delayed(const Duration(seconds:2));
-    setState(() {
-      _isLoading = false;
-      Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+      if (200 == codeNum) { //로그인 성공
+        Future.delayed(Duration(milliseconds: 900), () {
+          setState(() {
+            _isLoading = false;
+          });
+        });
+        Future.delayed(Duration(milliseconds: 1000), () {
+          Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+        });
+      }
+      else { //로그인 실패
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("계정이 존재하지 않습니다.\n다시 시도해주시기 바랍니다."),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: Text("확인"),
+                  onPressed: () {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+       }
     });
   }
 
@@ -97,8 +130,8 @@ class MainHomeState extends State<MainHome> {
                   return null;
                 },
                 decoration: InputDecoration(
-                    hintText: "비밀번호",
-                    border: OutlineInputBorder()
+                  hintText: "비밀번호",
+                  border: OutlineInputBorder()
                 ),
               ),
               Row(
@@ -106,12 +139,12 @@ class MainHomeState extends State<MainHome> {
                   Transform.scale(
                     scale: 0.9,
                     child: Checkbox(
-                        value: _isChecked,
-                        onChanged: (value) {
-                          setState(() {
-                            _isChecked = value!; //value값이 오류나서 임시방편으로 수정
-                          });
-                        }
+                      value: _isChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _isChecked = value!; //value값이 오류나서 임시방편으로 수정
+                        });
+                      }
                     ),
                   ),
                   Text("자동로그인"),
@@ -122,14 +155,15 @@ class MainHomeState extends State<MainHome> {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
-                    onPressed: () async {
-                      //if (_formKey.currentState!.validate()) {
-                        var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하가
-                        print("token : ${token ?? 'token NULL!'}");
-                        _isLoading ? null : _startLoading();
-                      //}
-                    },
-                    child: _isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : Text("로그인", style: TextStyle(color: Color(0xffF7D6AD)))
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하기
+                      print("token : ${token ?? 'token NULL!'}");
+                      _isLoading = true;
+                      getJSONData(token);
+                    }
+                  },
+                  child: _isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : Text("로그인", style: TextStyle(color: Color(0xffF7D6AD)))
                 ),
               ),
               SizedBox(height: 5.0), //사이 공백
@@ -177,5 +211,37 @@ class MainHomeState extends State<MainHome> {
         )
       )
     );
+  }
+
+  Future<String> getJSONData(token) async { //로그인 시도
+    var url = "http://192.168.219.103:8080/api/user/login";
+
+    Map<String, String> data = { //입력받은 데이터를 넣는다.
+      "birthDate": "19971115",
+      "userId": idController.text,
+      "userMobile": "",
+      "userName": "",
+      "userPassword": pwController.text,
+      "token": token.toString()
+    };
+    var bodys = json.encode(data);
+
+    final response = await http.post(
+        Uri.parse(url),
+        headers: <String, String> {
+          'Content-type' : 'application/json; charset=UTF-8'
+        },
+        body: bodys
+    );
+
+    if (response.statusCode == 200) {
+      _startLoading(200);
+      print(response.body);
+    }
+    else {
+      _startLoading(500);
+      print("failed to login");
+    }
+    return response.body;
   }
 }

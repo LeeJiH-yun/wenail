@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class signUpPage extends StatefulWidget {
   @override
@@ -10,10 +11,11 @@ class signUpPage extends StatefulWidget {
 class _signUpPageState extends State<signUpPage> {
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController nameController = new TextEditingController();
-  TextEditingController phoneController = new TextEditingController();
-  TextEditingController idController = new TextEditingController();
-  TextEditingController pwController = new TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController idController = TextEditingController();
+  TextEditingController pwController = TextEditingController();
+  TextEditingController pwChkController = TextEditingController();
 
   void printMSG() { //회원가입 버튼 눌렀을 때 이벤트처리..
     setState(() {
@@ -33,10 +35,11 @@ class _signUpPageState extends State<signUpPage> {
               ],
             ),
             actions: [
-              new FlatButton(
-                child: new Text("확인"),
+              TextButton(
+                child: Text("확인"),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.of(context).pop(); Navigator.of(context).pop();
+                  //첫번째 pop은 알림창 닫고 두번째 pop은 이전 화면으로 돌려준다.
                 },
               ),
             ],
@@ -61,14 +64,14 @@ class _signUpPageState extends State<signUpPage> {
             children: <Widget>[
               TextFormField(
                 controller: nameController,
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return "이름은 필수입니다.";
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "이름은 필수입니다.";
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
-                    hintText: "이름",
+                    hintText: "* 이름",
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.all(10)
                 ),
@@ -76,16 +79,45 @@ class _signUpPageState extends State<signUpPage> {
               SizedBox(height: 13.0),
               TextFormField(
                 controller: phoneController,
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return "전화번호는 필수입니다.";
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "전화번호는 필수입니다.";
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
-                    hintText: "전화번호",
+                    hintText: "* 전화번호",
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.all(10)
+                ),
+              ),
+              SizedBox(height: 13.0),
+              TextButton(
+                onPressed: () {
+                //   Future<DateTime> future = showDatePicker(
+                //     context: context,
+                //     initialDate: DateTime.now(),
+                //     firstDate: DateTime(1970),
+                //     lastDate: DateTime.now(),
+                //     locale : const Locale('kr')
+                //   );
+                //
+                //   future.then((date) {
+                //     setState(() {
+                //       _selectedDate = date;
+                //     });
+                //   });
+                },
+                child: Container(
+                  height: 45,
+                  padding: EdgeInsets.only(left: 15),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 1,
+                      color: Color(0xff312B28),
+                    )),
+                  alignment: Alignment.centerLeft,
+                  child: Text('생일 선택', style: TextStyle(color: Color(0xff312B28))),
                 ),
               ),
               SizedBox(height: 13.0),
@@ -95,14 +127,14 @@ class _signUpPageState extends State<signUpPage> {
                     width: 260,
                     child: TextFormField(
                       controller: idController,
-                      // validator: (value) {
-                      //   if (value == null || value.isEmpty) {
-                      //     return "아이디는 필수입니다.";
-                      //   }
-                      //   return null;
-                      // },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "아이디는 필수입니다.";
+                        }
+                        return null;
+                      },
                       decoration: InputDecoration(
-                        hintText: "아이디",
+                        hintText: "* 아이디",
                         isDense: true,
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.all(10)
@@ -123,28 +155,32 @@ class _signUpPageState extends State<signUpPage> {
               SizedBox(height: 13.0),
               TextFormField(
                 controller: pwController,
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return "비밀번호는 필수입니다.";
-                //   }
-                //   return null;
-                // },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "비밀번호는 필수입니다.";
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
-                  hintText: "비밀번호",
+                  hintText: "* 비밀번호",
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.all(10)
                 ),
               ),
               SizedBox(height: 13.0),
               TextFormField(
-                // validator: (value) {
-                //   if (value == null || value.isEmpty) {
-                //     return "비밀번호 확인은 필수입니다.";
-                //   }
-                //   return null;
-                // },
+                controller: pwChkController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "비밀번호 확인은 필수입니다.";
+                  }
+                  else if (pwChkController.text != pwController.text) {
+                    return "비밀번호가 일치하지 않습니다.";
+                  }
+                  return null;
+                },
                 decoration: InputDecoration(
-                  hintText: "비밀번호 확인",
+                  hintText: "* 비밀번호 확인",
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.all(10)
                 ),
@@ -156,9 +192,9 @@ class _signUpPageState extends State<signUpPage> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
                   onPressed: () => {
-                    //if (_formKey.currentState!.validate()) {
+                    if (_formKey.currentState!.validate()) {
                       printMSG()
-                    //}
+                    }
                   },
                   child: Text("회원가입")
                 ),
@@ -171,15 +207,16 @@ class _signUpPageState extends State<signUpPage> {
   }
 
   Future<String> getJSONData() async { //회원가입 데이터 보내기
-    var url = "http://192.168.219.103:8080/api/user/save"; //192.168.219.103 내 로컬주소
-    Map<String, String> data = { //입력받은 데이터를 넣는다. Map이란 키,값으로 이루어진 객체임
+    var url = "http://192.168.219.103:8080/api/user/save";
+
+    Map<String, String> data = {
       "birthDate": "19971115",
-      "userId": "test",
-      "userMobile": "01094345347",
-      "userName": "테스터",
-      "userPassword": "1234"
+      "userId": idController.text,
+      "userMobile": phoneController.text,
+      "userName": nameController.text,
+      "userPassword": pwController.text,
     };
-    var bodys = json.encode(data); //json.encode를 통해 json 형식으로 바꿔서 넣어준다.
+    var bodys = json.encode(data);
 
     final response = await http.post(
       Uri.parse(url),

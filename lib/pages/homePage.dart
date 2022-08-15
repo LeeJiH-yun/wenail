@@ -20,18 +20,19 @@ class _homePageState extends State<homePage> {
   ];
   DateTime? currentBackPressTime;
   List data = [];
-  TextEditingController _editingController = new TextEditingController();
+  TextEditingController _editingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]); // 상태바 숨기기
     return WillPopScope( //메인화면에서 뒤로가기시 로그인화면으로 이동되는 것을 방지
       onWillPop: onWillPop,
       child: Scaffold(
         body: SingleChildScrollView(
           scrollDirection: Axis.vertical,
-          padding: EdgeInsets.only(top: 20),
           child: Column(
             children: <Widget>[
+              appTitle(),
               Container(//앱 메인 이미지
                 width: MediaQuery.of(context).size.width,
                 height: 100,
@@ -44,7 +45,7 @@ class _homePageState extends State<homePage> {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: 300,
+                      width: 310,
                       child: TextField(
                         controller: _editingController,
                         keyboardType: TextInputType.text,
@@ -73,7 +74,7 @@ class _homePageState extends State<homePage> {
                 color: Colors.grey,
               ),
               Container(
-                padding: EdgeInsets.only(left: 20, right: 20),
+                padding: EdgeInsets.only(left: 10, right: 10),
                 child: //data!.length == 0 ?
                   // Container(
                   //   child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
@@ -126,6 +127,66 @@ class _homePageState extends State<homePage> {
       )
     );
   }
+
+  Container appTitle() {//앱 타이틀
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        height: 45,
+        padding: EdgeInsets.only(left: 10, right: 10),
+        margin: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.brown.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                  child: Text("우리네일", style: TextStyle(color: Color(0xffF7D6AD), fontSize: 17))
+              ),
+              SizedBox(width: 110),
+              IconButton(
+                color: Color(0xffF7D6AD),
+                icon: Icon(Icons.exit_to_app),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: Text("로그아웃 하겠습니까?", textAlign: TextAlign.center),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                        backgroundColor: Colors.white,
+                        actions: [
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton(
+                                  child: Text("취소"),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text("확인"),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      );
+                    },
+                  );
+                }
+              )
+            ]
+        )
+    );
+  }
+
   Future<bool> onWillPop() async {
     DateTime now = DateTime.now();
 
@@ -139,6 +200,7 @@ class _homePageState extends State<homePage> {
     SystemNavigator.pop(); //앱 종료
     return true;
   }
+
   Future<String> getJSONData() async { //검색했을 때 데이터가 조회되도록
     var url = "내로컬주소로 해야하나 rest주소로 해야하나 ? target=store&query=${_editingController}";
     var response = await http.get(Uri.parse(url));

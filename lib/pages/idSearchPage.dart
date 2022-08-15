@@ -92,7 +92,7 @@ class _idSearchState extends State<idSearch> {
                       ],
                     ),
                     actions: [
-                      new FlatButton(
+                      TextButton(
                         child: new Text("확인"),
                         onPressed: () {
                           Navigator.pop(context);

@@ -20,14 +20,6 @@ class _homeMainState extends State<homeMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("우리네일", style: TextStyle(color: Color(0xffF7D6AD))),
-        centerTitle: true,
-        automaticallyImplyLeading: false, //화살표 삭제
-        actions: [
-          IconButton(icon: Icon(Icons.logout), onPressed: () {Navigator.pop(context);}),
-        ],
-      ),
       body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         onTap: _onItemTapped,
