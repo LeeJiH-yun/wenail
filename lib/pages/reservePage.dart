@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'dart:convert'; //JSON데이터 사용해서 가져옴
+import 'package:http/http.dart' as http;
 
 class reservePage extends StatefulWidget {
-  const reservePage({Key? key}) : super(key: key);
+  final String data; //Map형식으로 넘겨줘서 이렇게 선언함
+  const reservePage(this.data); //넘어온 데이터 사용
 
   @override
   _reserveState createState() => _reserveState();
@@ -27,6 +30,7 @@ class _reserveState extends State<reservePage> {
     {"goods_image": "", "goods_name": "젤네일", "price": "50,000", "content": "젤 네일입니다"},
     {"goods_image": "", "goods_name": "젤패디", "price": "60,000", "content": "젤 패디입니다"}
   ];
+  List<dynamic> goodsGetList = [];
 
   bool _visibility = false, //예약하기 하단바 보여주기 여부
        _goodsVisibility = false, //상품목록 보여주기 여부
@@ -34,6 +38,16 @@ class _reserveState extends State<reservePage> {
 
   int timeSelected = 0,
       goodsSelected = 0;
+
+  // @override
+  void initState() {
+    super.initState();
+    //데이터 응답받기 전에 로딩 추가하기
+    getGoodsListData(); //상품목록 api 호출
+    _goodsVisibility = true; //맨처음 들어왔을 때 맨처음 것이 디폴트로 보이게 할거라.. 일단 넣어봄ㅅ
+    _timeVisibility = true;
+    _visibility = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,20 +92,21 @@ class _reserveState extends State<reservePage> {
                 ),
                 onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
                   setState(() {
-                    //선택된 날짜의 상태를 갱신한다.
-                    _goodsVisibility = true;
+                    print("넘어온 데이터 확인" + widget.data);
 
+                    //선택된 날짜의 상태를 갱신한다.
+                    //getGoodsListData(); //상품목록 api 호출
+                    //_goodsVisibility = true;
                     this.selectedDay = selectedDay;
-                    //this.focusedDay = focusedDay;
-                    if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _timeVisibility) {
-                      //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우
+                    if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _timeVisibility || (selectedDay == this.focusedDay) && _goodsVisibility) {
+                      //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우 (시간선택은 열려있고)
                       setState(() {
                         _visibility = false;
                       });
                     }
                     if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _goodsVisibility) {
-                      setState(() {
-                        _timeVisibility = false;
+                      setState(() {//선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우 (상품선택은 열려있고)
+                        //_timeVisibility = false;
                       });
                     }
                   });
@@ -121,6 +136,14 @@ class _reserveState extends State<reservePage> {
                 visible: _goodsVisibility,
                 child: goodsList()
               ),
+              Visibility(  //상품 설명
+                  visible: _goodsVisibility,
+                  child: prodDetail()
+              ),
+              Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
               timesTitle(), //시간선택 타이틀
               Divider(
                 thickness: 1,
@@ -129,7 +152,7 @@ class _reserveState extends State<reservePage> {
               Visibility(  //시간 목록
                 visible: _timeVisibility,
                 child: timesList()
-              ),
+              )
             ],
           )
         ),
@@ -185,30 +208,21 @@ class _reserveState extends State<reservePage> {
 
   Container goodsTitle() { //상품 선택
     return Container(
-      color: Colors.white,
       width: MediaQuery.of(context).size.width,
       height: 30,
       padding: EdgeInsets.all(5),
       margin: EdgeInsets.only(left: 5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-              child: Row(
-              children: [
-                Text('상품선택',style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
-                Container(
-                  margin: EdgeInsets.only(left: 10),
-                  child: Icon(Icons.refresh),
-                ),
-              ],
+      child: Container(
+          child: Row(
+          children: [
+            Text('상품선택',style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
+            Container(
+              margin: EdgeInsets.only(left: 10),
+              child: Icon(Icons.refresh),
             ),
-          ),
-          Container(
-            child: Text('항목을 길게 터치하면 설명을 볼 수 있습니다!',style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.brown)),
-          )
-        ],
-      )
+          ],
+        ),
+      ),
     );
   }
 
@@ -218,7 +232,7 @@ class _reserveState extends State<reservePage> {
       height: 80,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: goodsArray.length,
+        itemCount: goodsGetList == null ? 0 : goodsGetList.length,
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
@@ -235,19 +249,20 @@ class _reserveState extends State<reservePage> {
               width: 100,
               margin: EdgeInsets.all(6),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: (_timeVisibility && goodsSelected == index) ? Colors.transparent : Colors.blue,
+                borderRadius: BorderRadius.circular(15), //_timeVisibility &&
+                color: (goodsSelected == index) ? Colors.transparent : Colors.blue,
                 border: Border.all(color: Colors.black),
               ),
-              child: Tooltip(
-                message: goodsArray[index]["content"],
-                //triggerMode: TooltipTriggerMode.tap, //한 번 선택시 내용이 나오지만 클릭 이벤트가 안먹힘
-                child: Column(
+              child: goodsGetList.length == 0 ?
+              Container(
+                  child: Text("조회된 상품 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+              ) :
+              Column(
                   children: [
-                    Text(goodsArray[index]["goods_name"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
-                    Text(goodsArray[index]["price"], style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
-                  ],
-                ),
+                    Text(goodsGetList![index]["productTitle"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+                    //Text(goodsGetList![index]["productPrice"], style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
+                    //productCode, productPrice이 int로 넘어와서 String이 아니기에 오류난다 수정해야함..
+                  ]
               )
             )
           );
@@ -256,9 +271,15 @@ class _reserveState extends State<reservePage> {
     );
   }
 
+  Container prodDetail() { //상품 설명
+    return Container(
+      child: Text("손 케어를 할 수 있으며 이는 매우 비싸다\n고로 난 안한다. 근데 언젠간 해볼 듯 싶지만\n내용이 어느 정도 너비를 차지하는게 좋은가", style: TextStyle(fontSize: 17.0), textAlign: TextAlign.center),
+      //child: Text(_goodsVisibility ? goodsGetList![goodsSelected]["productContent"] : "test", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+    );
+  }
+
   Container timesTitle() { //시간선택 타이틀
     return Container(
-      color: Colors.white,
       width: MediaQuery.of(context).size.width,
       height: 30,
       padding: EdgeInsets.all(5),
@@ -299,6 +320,7 @@ class _reserveState extends State<reservePage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   color: (_visibility && timeSelected == index) ? Colors.transparent : Colors.blue,
+                  //상품을 선택하면 하나는
                   border: Border.all(color: Colors.black),
                 ),
                 child: Text(timeArray[index]["time"], style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center)
@@ -307,5 +329,58 @@ class _reserveState extends State<reservePage> {
         }
       )
     );
+  }
+
+  void getGoodsListData() async { //상품리스트 목록 조회
+    var url = "http://192.168.219.103:8080/api/product/list?storeCode=${widget.data}";
+    var response = await http.get(
+      Uri.parse(url),
+      headers: <String, String> {
+        'Content-type' : 'application/json; charset=UTF-8'
+      }
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        String responseBody = utf8.decode(response.bodyBytes);
+        List<dynamic> testList = jsonDecode(responseBody);
+        goodsGetList!.addAll(testList);
+        print("goodsGetList?: ${goodsGetList}");
+        print("response.body?: ${response.body}");
+      });
+    }
+    else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text("데이터 조회에 실패했습니다.\n다시 시도해주세요.", textAlign: TextAlign.center),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            backgroundColor: Colors.white,
+            actions: [
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: Text("취소"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    TextButton(
+                      child: Text("확인"),
+                      onPressed: () {
+                        Navigator.of(context).pop();;
+                      },
+                    ),
+                  ],
+                ),
+              )
+            ],
+          );
+        }
+      );
+    }
   }
 }

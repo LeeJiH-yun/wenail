@@ -19,7 +19,10 @@ class _homePageState extends State<homePage> {
     'asset/images/test6.jpg',
   ];
   DateTime? currentBackPressTime;
-  List data = [];
+  List<Map> data = [
+    {"STORE" : "안산 뷰티네일샵", "STORE_CODE" : "WN0001", "image": "asset/images/test1.jpg"},
+    {"STORE" : "안산 뷰티네일샵test", "STORE_CODE" : "WN000133", "image": "asset/images/test2.jpg"}
+  ];
   TextEditingController _editingController = TextEditingController();
 
   @override
@@ -58,7 +61,7 @@ class _homePageState extends State<homePage> {
                     ),
                     InkWell(
                       onTap: () async {
-                        getJSONData();
+                        getListData();
                       },
                       child: Container(
                         margin: EdgeInsets.only(left: 15),
@@ -75,14 +78,14 @@ class _homePageState extends State<homePage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 10, right: 10),
-                child: //data!.length == 0 ?
-                  // Container(
-                  //   child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
-                  // ) :
+                child: data!.length == 0 ?
+                  Container(
+                    child: Text("조회된 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+                  ) :
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(), //이거 넣으니까 일단 스크롤은 됨..찾아봐야한다.
-                    itemCount: iconList.length,
+                    itemCount: data.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         height: 100,
@@ -91,7 +94,7 @@ class _homePageState extends State<homePage> {
                           color: Colors.teal,
                           borderRadius: BorderRadius.circular(20),
                           image: DecorationImage(
-                            image: AssetImage(iconList[index]),
+                            image: AssetImage(data[index]["image"]),
                             fit: BoxFit.fill
                           )
                         ),
@@ -100,8 +103,14 @@ class _homePageState extends State<homePage> {
                             alignment: Alignment.bottomRight,
                             child:
                             InkWell(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => reservePage()));
+                              onTap: () {
+                                print(data[index]);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => reservePage(data[index]["STORE_CODE"]) //선택한 데이터 넘기기
+                                  )
+                                );
                               },
                               child: Container(
                                   height: 30,
@@ -170,7 +179,8 @@ class _homePageState extends State<homePage> {
                                 TextButton(
                                   child: Text("확인"),
                                   onPressed: () {
-                                    Navigator.pop(context);
+                                    //테이블에 저장된 토큰값을 지워줘야할듯싶음
+                                    Navigator.of(context).pop(); Navigator.of(context).pop();
                                   },
                                 ),
                               ],
@@ -201,14 +211,14 @@ class _homePageState extends State<homePage> {
     return true;
   }
 
-  Future<String> getJSONData() async { //검색했을 때 데이터가 조회되도록
-    var url = "내로컬주소로 해야하나 rest주소로 해야하나 ? target=store&query=${_editingController}";
+  Future<String> getListData() async { //검색했을 때 데이터가 조회되도록
+    var url = "http://192.168.219.103:8080/api/product?query=${_editingController}";
     var response = await http.get(Uri.parse(url));
 
     setState(() {
       var dataConvertedToJSON = json.decode(response.body);
       List result = dataConvertedToJSON["document"];
-      data!.addAll(result);
+      //data!.addAll(result);
     });
     return response.body;
   }

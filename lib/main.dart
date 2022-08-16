@@ -28,6 +28,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.brown,
       ),
+      // localizationsDelegates: [
+      //   GlobalMaterialLocalizations.delegate,
+      //   GlobalWidgetsLocalizations.delegate,
+      // ],
+      // supportedLocales: [
+      //   Locale('en', 'US'),
+      //   Locale('ko', 'KO'),
+      // ],
       home: MainHome(),
     );
   }
@@ -159,8 +167,9 @@ class MainHomeState extends State<MainHome> {
                     if (_formKey.currentState!.validate()) {
                       var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하기
                       print("token : ${token ?? 'token NULL!'}");
+                      //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
                       _isLoading = true;
-                      getJSONData(token);
+                      setLoginData(token);
                     }
                   },
                   child: _isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : Text("로그인", style: TextStyle(color: Color(0xffF7D6AD)))
@@ -173,38 +182,38 @@ class MainHomeState extends State<MainHome> {
               ),
               SizedBox(height: 11.0), //사이 공백
               IntrinsicHeight(
-                  child:Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        child: Text("비밀번호찾기"),
+                child:Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      child: Text("비밀번호찾기"),
+                    ),
+                    VerticalDivider(
+                      thickness: 1,
+                      color: Colors.orange,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => idSearch()));
+                      },
+                      child: Container(
+                        child: Text("아이디찾기"),
                       ),
-                      VerticalDivider(
-                        thickness: 1,
-                        color: Colors.orange,
+                    ),
+                    VerticalDivider(
+                      thickness: 1,
+                      color: Colors.orange,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => signUpPage()));
+                      },
+                      child: Container(
+                        child: Text("회원가입"),
                       ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => idSearch()));
-                        },
-                        child: Container(
-                          child: Text("아이디찾기"),
-                        ),
-                      ),
-                      VerticalDivider(
-                        thickness: 1,
-                        color: Colors.orange,
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => signUpPage()));
-                        },
-                        child: Container(
-                          child: Text("회원가입"),
-                        ),
-                      )
-                    ],
-                  )
+                    )
+                  ],
+                )
               )
             ]
           ),
@@ -213,14 +222,14 @@ class MainHomeState extends State<MainHome> {
     );
   }
 
-  Future<String> getJSONData(token) async { //로그인 시도
+  Future<String> setLoginData(token) async { //로그인 시도
     var url = "http://192.168.219.103:8080/api/user/login";
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
-      "birthDate": "19971115",
+      "birthDate": "19971115", //안보내도됨
       "userId": idController.text,
-      "userMobile": "",
-      "userName": "",
+      "userMobile": "", //안보내도됨
+      "userName": "", //안보내도됨
       "userPassword": pwController.text,
       "token": token.toString()
     };
@@ -233,7 +242,7 @@ class MainHomeState extends State<MainHome> {
         },
         body: bodys
     );
-
+    print(response.body);
     if (response.statusCode == 200) {
       _startLoading(200);
       print(response.body);

@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class signUpPage extends StatefulWidget {
@@ -16,10 +18,12 @@ class _signUpPageState extends State<signUpPage> {
   TextEditingController idController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   TextEditingController pwChkController = TextEditingController();
+  TextEditingController _DataTimeEditingController = TextEditingController();
 
-  void printMSG() { //회원가입 버튼 눌렀을 때 이벤트처리..
+  String? dateTime;
+
+  void printMSG(status) { //회원가입 버튼 눌렀을 때 이벤트처리..
     setState(() {
-      getJSONData(); //입력받은 데이터 서버로 보내기
       showDialog(
         context: context,
         barrierDismissible: false, //Dialog를 제외한 다른 화면 터치 x
@@ -31,7 +35,7 @@ class _signUpPageState extends State<signUpPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("회원가입 성공!"),
+                Text(200 == status? "회원가입 성공!" : "회원가입 실패\n서버가 불안정합니다. 다시 시도해주세요."),
               ],
             ),
             actions: [
@@ -92,32 +96,33 @@ class _signUpPageState extends State<signUpPage> {
                 ),
               ),
               SizedBox(height: 13.0),
-              TextButton(
-                onPressed: () {
-                //   Future<DateTime> future = showDatePicker(
-                //     context: context,
-                //     initialDate: DateTime.now(),
-                //     firstDate: DateTime(1970),
-                //     lastDate: DateTime.now(),
-                //     locale : const Locale('kr')
-                //   );
-                //
-                //   future.then((date) {
-                //     setState(() {
-                //       _selectedDate = date;
-                //     });
-                //   });
+              InkWell(
+                onTap: () {
+                  Future<DateTime?> future = showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1970),
+                    lastDate: DateTime.now()
+                  );
+
+                  future.then((date) {
+                    setState(() {
+                      String formattedDate = DateFormat('yyyy-MM-dd').format(date!);
+                      dateTime = formattedDate;
+                    });
+                  });
                 },
                 child: Container(
-                  height: 45,
-                  padding: EdgeInsets.only(left: 15),
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.all(13),
+                  child: Text(dateTime == null ? "생일 선택": "$dateTime", style: TextStyle(fontSize: 15)),
                   decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
                     border: Border.all(
-                      width: 1,
-                      color: Color(0xff312B28),
-                    )),
-                  alignment: Alignment.centerLeft,
-                  child: Text('생일 선택', style: TextStyle(color: Color(0xff312B28))),
+                      color: Color(0xff888888)
+                    )
+                  ),
                 ),
               ),
               SizedBox(height: 13.0),
@@ -191,9 +196,10 @@ class _signUpPageState extends State<signUpPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ElevatedButton(
-                  onPressed: () => {
+                  onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      printMSG()
+                      var dateReplace = dateTime?.replaceAll("-", ""); //-를 포함하여 저장되므로 제거해서 생일 데이터를 보내준다.
+                      setSignData(dateReplace);
                     }
                   },
                   child: Text("회원가입")
@@ -206,11 +212,11 @@ class _signUpPageState extends State<signUpPage> {
     );
   }
 
-  Future<String> getJSONData() async { //회원가입 데이터 보내기
+  Future<String> setSignData(date) async { //회원가입 데이터 보내기
     var url = "http://192.168.219.103:8080/api/user/save";
 
     Map<String, String> data = {
-      "birthDate": "19971115",
+      "birthDate": date,
       "userId": idController.text,
       "userMobile": phoneController.text,
       "userName": nameController.text,
@@ -227,11 +233,14 @@ class _signUpPageState extends State<signUpPage> {
     );
 
     if (response.statusCode == 200) {
-      print(response.body);
+      var responseBody = utf8.decode(response.bodyBytes); //한글깨질때
+      print(responseBody);
     }
     else {
       print("failed to save data");
     }
+
+    printMSG(response.statusCode);
     return response.body;
   }
 }
