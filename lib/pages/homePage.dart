@@ -20,7 +20,7 @@ class _homePageState extends State<homePage> {
   ];
   DateTime? currentBackPressTime;
   List<Map> data = [
-    {"STORE" : "안산 뷰티네일샵", "STORE_CODE" : "WN0001", "image": "asset/images/test1.jpg"},
+    {"STORE" : "안산 뷰티네일샵", "STORE_CODE" : "WN0002", "image": "asset/images/test1.jpg"},
     {"STORE" : "안산 뷰티네일샵test", "STORE_CODE" : "WN000133", "image": "asset/images/test2.jpg"}
   ];
   TextEditingController _editingController = TextEditingController();
