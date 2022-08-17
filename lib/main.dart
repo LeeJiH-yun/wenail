@@ -7,13 +7,14 @@ import 'package:wenail/pages/idSearchPage.dart';
 import 'package:wenail/pages/signUpPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  initializeDateFormatting('ko-KR', null); //기본 언어 초기화
+  // initializeDateFormatting('ko-KR', null); //기본 언어 초기화
   runApp(const MyApp());
 }
 
@@ -28,14 +29,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.brown,
       ),
-      // localizationsDelegates: [
-      //   GlobalMaterialLocalizations.delegate,
-      //   GlobalWidgetsLocalizations.delegate,
-      // ],
-      // supportedLocales: [
-      //   Locale('en', 'US'),
-      //   Locale('ko', 'KO'),
-      // ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale('ko', 'KO'),
+      ],
+      locale: const Locale('ko'),
       home: MainHome(),
     );
   }
@@ -168,7 +169,9 @@ class MainHomeState extends State<MainHome> {
                       var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하기
                       print("token : ${token ?? 'token NULL!'}");
                       //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
-                      _isLoading = true;
+                      setState(() {
+                        _isLoading = true;
+                      });
                       setLoginData(token);
                     }
                   },
@@ -223,7 +226,7 @@ class MainHomeState extends State<MainHome> {
   }
 
   Future<String> setLoginData(token) async { //로그인 시도
-    var url = "http://192.168.219.103:8080/api/user/login";
+    var url = "http://172.30.1.48:8080/api/user/login"; //집와이파이 192.168.219.103
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
       "birthDate": "19971115", //안보내도됨
@@ -236,13 +239,14 @@ class MainHomeState extends State<MainHome> {
     var bodys = json.encode(data);
 
     final response = await http.post(
-        Uri.parse(url),
-        headers: <String, String> {
-          'Content-type' : 'application/json; charset=UTF-8'
-        },
-        body: bodys
+      Uri.parse(url),
+      headers: <String, String> {
+        'Content-type' : 'application/json; charset=UTF-8'
+      },
+      body: bodys
     );
     print(response.body);
+
     if (response.statusCode == 200) {
       _startLoading(200);
       print(response.body);

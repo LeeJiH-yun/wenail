@@ -20,6 +20,8 @@ class _reserveState extends State<reservePage> {
     DateTime.now().day,
   );
   DateTime focusedDay = DateTime.now();
+  bool _isLoading = false;
+  final ScrollController _scrollController = ScrollController();
 
   List<Map> timeArray = [{"time": "12:00"}, {"time": "12:30"}, {"time": "13:00"}, {"time": "13:30"}, {"time": "14:00"}, {"time": "14:30"},
   {"time": "15:00"}, {"time": "15:30"}];
@@ -134,11 +136,11 @@ class _reserveState extends State<reservePage> {
               ),
               Visibility(  //상품 목록
                 visible: _goodsVisibility,
-                child: goodsList()
+                child: !_isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : goodsList()
               ),
               Visibility(  //상품 설명
                   visible: _goodsVisibility,
-                  child: prodDetail()
+                  child: _isLoading ? prodDetail() : Container(height: 20, child: Text("조회된 상품이 없습니다.", style: TextStyle(color: Color(0xffF7D6AD))))
               ),
               Divider(
                 thickness: 1,
@@ -271,8 +273,17 @@ class _reserveState extends State<reservePage> {
     );
   }
 
-  Container prodDetail() { //상품 설명
-    return Container(
+  Scrollbar prodDetail() { //상품 설명
+    return Scrollbar(
+      controller: _scrollController,
+      isAlwaysShown: true,
+      thickness: 15,
+      child: Container(
+        child: Text("손 케어를 할 수 있으며 이는 매우 비싸다\n고로 난 안한다. 근데 언젠간 해볼 듯 싶지만\n내용이 어느 정도 너비를 차지하는게 좋은가", style: TextStyle(fontSize: 17.0), textAlign: TextAlign.center),
+        //child: Text(_goodsVisibility ? goodsGetList![goodsSelected]["productContent"] : "test", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+      )
+    );
+      Container(
       child: Text("손 케어를 할 수 있으며 이는 매우 비싸다\n고로 난 안한다. 근데 언젠간 해볼 듯 싶지만\n내용이 어느 정도 너비를 차지하는게 좋은가", style: TextStyle(fontSize: 17.0), textAlign: TextAlign.center),
       //child: Text(_goodsVisibility ? goodsGetList![goodsSelected]["productContent"] : "test", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
     );
@@ -332,7 +343,7 @@ class _reserveState extends State<reservePage> {
   }
 
   void getGoodsListData() async { //상품리스트 목록 조회
-    var url = "http://192.168.219.103:8080/api/product/list?storeCode=${widget.data}";
+    var url = "http://172.30.1.48:8080/api/product/list?storeCode=${widget.data}"; //192.168.219.103
     var response = await http.get(
       Uri.parse(url),
       headers: <String, String> {
@@ -343,13 +354,21 @@ class _reserveState extends State<reservePage> {
     if (response.statusCode == 200) {
       setState(() {
         String responseBody = utf8.decode(response.bodyBytes);
-        List<dynamic> testList = jsonDecode(responseBody);
+        List<dynamic> testList = jsonDecode(responseBody).toList();
         goodsGetList!.addAll(testList);
+        Future.delayed(Duration(milliseconds: 900), () {
+          setState(() {
+            _isLoading = true;
+          });
+        });
         print("goodsGetList?: ${goodsGetList}");
-        print("response.body?: ${response.body}");
+        print("response.body?: ${testList}");
       });
     }
     else {
+      setState(() {
+        _isLoading = true;
+      });
       showDialog(
         context: context,
         builder: (BuildContext context) {
