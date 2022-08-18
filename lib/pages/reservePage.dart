@@ -22,6 +22,7 @@ class _reserveState extends State<reservePage> {
   DateTime focusedDay = DateTime.now();
 
   bool _isLoading = false; //로딩 여부
+  bool _isTimeLoading = false; //시간목록 새로고침 할 때
   bool _isFail = false; //서버 연결 여부 상품설명에서 사용하려고
   bool _visibility = false, //예약하기 하단바 보여주기 여부
       _goodsVisibility = false, //상품목록 보여주기 여부
@@ -39,6 +40,56 @@ class _reserveState extends State<reservePage> {
     //데이터 응답받기 전에 로딩 추가하기
     getGoodsListData(); //상품목록 api 호출
     _goodsVisibility = true; //맨처음 들어왔을 때 맨처음 것이 디폴트로 보이게 할거라.. 일단 넣어봄ㅅ
+    _timeVisibility = true;
+  }
+
+  void printMSG(status) {
+    setState(() {
+      if (200 == status) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text("예약이 신청되었습니다.", style: TextStyle(color: Color(0xff312B28)), textAlign: TextAlign.center),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              backgroundColor: Colors.white,
+              actions: [
+                Center(
+                    child: TextButton(
+                      child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
+                      onPressed: () {
+                        Navigator.of(context).pop(); Navigator.of(context).pop();
+                      },
+                    )
+                )
+              ],
+            );
+          },
+        );
+      }
+      else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text("서버가 불안정합니다.\n다시 시도해주세요.", style: TextStyle(color: Color(0xff312B28)), textAlign: TextAlign.center),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              backgroundColor: Colors.white,
+              actions: [
+                Center(
+                    child: TextButton(
+                      child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                )
+              ],
+            );
+          },
+        );
+      }
+    });
   }
 
   @override
@@ -147,9 +198,9 @@ class _reserveState extends State<reservePage> {
                 visible: _timeVisibility,
                 child: !_isLoading && !_isFail ?
                 Container(
-                    child: Text("조회된 상품 목록이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xff312B28)), textAlign: TextAlign.center)
+                    child: Text("조회된 상품 목록이 없습니다.", style: TextStyle(fontSize: 15, color: Color(0xff312B28)), textAlign: TextAlign.center)
                 ) :
-                timesList()
+                (!_isTimeLoading) ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : timesList()
               )
             ],
           )
@@ -165,26 +216,7 @@ class _reserveState extends State<reservePage> {
                     margin: EdgeInsets.only(bottom: 10, right: 5),
                     child: InkWell(
                       onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              content: Text("예약신청이 됐습니다.", style: TextStyle(color: Color(0xff312B28)), textAlign: TextAlign.center),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                              backgroundColor: Colors.white,
-                              actions: [
-                                Center(
-                                    child: TextButton(
-                                      child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                      },
-                                    )
-                                )
-                              ],
-                            );
-                          },
-                        );
+                        setReserveData();
                       },
                       child: Container(
                           height: 30,
@@ -214,10 +246,16 @@ class _reserveState extends State<reservePage> {
         child: Row(
           children: [
             Text('상품선택', style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
-            Container(
-              margin: EdgeInsets.only(left: 10),
-              child: Icon(Icons.refresh),
-            ),
+            InkWell(
+              onTap: () {
+                _isLoading = false;
+                getGoodsListData();
+              },
+              child: Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Icon(Icons.refresh),
+              ),
+            )
           ],
         ),
       ),
@@ -237,7 +275,9 @@ class _reserveState extends State<reservePage> {
                 setState(() {
                   //상품선택시 시간 목록을 보여준다.
                   _timeVisibility = true;
+                  _isTimeLoading = false;
                   getTimesListData(); //시간 목록 구하기
+
                   goodsSelected = index;
                   if (_visibility) { //시간이 선택되어있다면 다른 상품 선택시 초기화 시키도록 함
                     _visibility = false;
@@ -250,8 +290,16 @@ class _reserveState extends State<reservePage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     //_timeVisibility &&
-                    color: (_timeVisibility && goodsSelected == index) ? Colors.transparent : Colors.blue,
+                    color: (goodsSelected == index) ? Color(0xffF7D6AD) : Color(0xffb47764),
                     border: Border.all(color: Colors.black),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.7),
+                        blurRadius: 5.0,
+                        spreadRadius: 0.0,
+                        offset: const Offset(0,7),
+                      )
+                    ]
                   ),
                   child: goodsGetList.length == 0 ?
                   Container(
@@ -261,8 +309,6 @@ class _reserveState extends State<reservePage> {
                     children: [
                       Text(goodsGetList![index]["productTitle"],style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
                       Text(goodsGetList![index]["productPrice"].toString(), style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
-                      //productCode, productPrice이 int로 넘어와서 String이 아니기에 오류난다 수정해야함..
-                      //형변환 그냥 붙여주면 됐음 ㅅㅂ
                     ]
                   )
               )
@@ -272,11 +318,35 @@ class _reserveState extends State<reservePage> {
     );
   }
 
-  Container prodDetail() {//상품 설명
-    return _isFail ? Container(child: Text("상품이 없습니다.", style: TextStyle(fontSize: 17.0, color: Color(0xff777777)), textAlign: TextAlign.center)) :
+  Row prodDetail() {//상품 설명
+    return _isFail ? Row(children: [Container(child: Text("상품이 없습니다.", style: TextStyle(fontSize: 17.0, color: Color(0xff777777)), textAlign: TextAlign.center))]) :
     //조회 실패했을 경우 _isFail
-    Container(
-       child: Text(_goodsVisibility && _timeVisibility ? goodsGetList![goodsSelected]["productContent"] : "상품을 선택해주세요.", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          width: 200,
+          height: 200,
+          margin: EdgeInsets.only(left: 3),
+          padding: EdgeInsets.all(5),
+          child: Text("위치확인", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            image: DecorationImage(
+              image: AssetImage("asset/images/test1.jpg"),
+              fit: BoxFit.fill
+            )
+          ),
+        ),
+        Container(
+          width: 200,
+          height: 200,
+          color: Colors.pink,
+          margin: EdgeInsets.only(right: 3),
+          padding: EdgeInsets.all(5),
+          child: Text(_goodsVisibility && _timeVisibility ? goodsGetList![goodsSelected]["productContent"] : "상품을 선택해주세요.", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+        )
+      ],
     );
   }
 
@@ -291,10 +361,17 @@ class _reserveState extends State<reservePage> {
           Container(
             child: Text('시간선택', style: TextStyle(color: Color(0xff312B28), fontSize: 15.0, fontWeight: FontWeight.bold)),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 10),
-            child: Icon(Icons.refresh),
+          InkWell(
+            onTap: () {
+              _isTimeLoading = false;
+              getTimesListData();
+            },
+            child: Container(
+              margin: EdgeInsets.only(left: 10),
+              child: Icon(Icons.refresh)
+            ),
           )
+
         ],
       )
     );
@@ -317,7 +394,7 @@ class _reserveState extends State<reservePage> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        content: Text("예약이 불가능한 시간대입니다.\n다른 시간을 선택해주세요.", textAlign: TextAlign.center),
+                        content: Text("예약이 불가능한 시간입니다.\n다른 시간을 선택해주세요.", textAlign: TextAlign.center),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                         backgroundColor: Colors.white,
                         actions: [
@@ -447,7 +524,7 @@ class _reserveState extends State<reservePage> {
         timesGetList!.addAll(timesList);
         Future.delayed(Duration(milliseconds: 900), () {
           setState(() {
-            _isLoading = true;
+            _isTimeLoading = true;
           });
         });
         print("weekdayNum?: ${weekdayNum}");
@@ -456,7 +533,7 @@ class _reserveState extends State<reservePage> {
     }
     else {
       setState(() {
-        _isLoading = true;
+        _isTimeLoading = true;
       });
       showDialog(
           context: context,
@@ -491,5 +568,39 @@ class _reserveState extends State<reservePage> {
       );
       throw "서버 연결이 끊겼습니다.\n다시 시도해주세요.";
     }
+  }
+
+  Future<String> setReserveData() async { //예약하기
+    var url = "http://192.168.219.103:8080/api/reserve/";
+    final DateTime now = selectedDay; //selectedDay는 시간까지 출력해서 값을 변경시키기 위함
+    final DateFormat formatter = DateFormat('yyyyMMdd');
+    final String formatted = formatter.format(now);
+
+    Map<String, String> data = {
+      "reserveDate": formatted.toString(),
+      "reserveTime": timesGetList[timeSelected]["dayTime"].toString(),
+      "storeCode": widget.data.toString(),
+      "userId": "lsh",
+    };
+    var bodys = json.encode(data);
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: <String, String> {
+        'Content-type' : 'application/json; charset=UTF-8'
+      },
+      body: bodys
+    );
+
+    if (response.statusCode == 200) {
+      var responseBody = utf8.decode(response.bodyBytes); //한글깨질때
+      print(responseBody);
+    }
+    else {
+      print("failed to save data");
+    }
+
+    printMSG(response.statusCode);
+    return response.body;
   }
 }

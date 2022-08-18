@@ -168,7 +168,7 @@ class MainHomeState extends State<MainHome> {
                     if (_formKey.currentState!.validate()) {
                       var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하기
                       print("token : ${token ?? 'token NULL!'}");
-                      //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+                      Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
                       setState(() {
                         _isLoading = true;
                       });
@@ -226,13 +226,10 @@ class MainHomeState extends State<MainHome> {
   }
 
   Future<String> setLoginData(token) async { //로그인 시도
-    var url = "http://172.30.1.48:8080/api/user/login"; //집와이파이 192.168.219.103
+    var url = "http://192.168.219.103/api/user/login"; //집와이파이 192.168.219.103
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
-      "birthDate": "19971115", //안보내도됨
       "userId": idController.text,
-      "userMobile": "", //안보내도됨
-      "userName": "", //안보내도됨
       "userPassword": pwController.text,
       "token": token.toString()
     };
