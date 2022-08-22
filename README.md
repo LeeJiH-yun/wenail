@@ -1,6 +1,7 @@
-# wenail
+# Description
+2022.07 - 2022.08
 
-A new Flutter project.
+네일샵의 관리자, 사용자가 관리 또는 예약을 할 수 있는 앱 [팀 작업]
 
 ## Getting Started
 
