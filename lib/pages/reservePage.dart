@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'dart:typed_data';
 import 'package:intl/date_symbol_data_local.dart';
 import 'dart:convert'; //JSON데이터 사용해서 가져옴
 import 'package:http/http.dart' as http;
@@ -30,6 +31,7 @@ class _reserveState extends State<reservePage> {
 
   List<dynamic> goodsGetList = [];
   List<dynamic> timesGetList = [];
+  List<dynamic> testImage = [];
 
   int timeSelected = 0, goodsSelected = 0;
   late int weekdayNum;
@@ -147,12 +149,15 @@ class _reserveState extends State<reservePage> {
                       //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우 (시간선택은 열려있고)
                       setState(() {
                         _visibility = false;
+                        _isLoading = false;
+                        goodsSelected = 0;
+                        getGoodsListData();
                       });
                     }
-                    if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _goodsVisibility) {setState(() { //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우 (상품선택은 열려있고)
-                        //_timeVisibility = false;
-                      });
-                    }
+                    // if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _goodsVisibility) {setState(() { //선택했던 날짜랑 다르거나 이전에 선택했던 날짜를 다시 선택했을 경우 (상품선택은 열려있고)
+                    //     _timeVisibility = false;
+                    //   });
+                    // }
                   });
                 },
                 selectedDayPredicate: (DateTime day) {
@@ -160,10 +165,9 @@ class _reserveState extends State<reservePage> {
                 },
                 onPageChanged: (focusedDay) {
                   setState(() { //달력 월을 넘길 때
-                    _timeVisibility = false;
                     _isLoading = false;
-                    getGoodsListData(); //상품목록 새로고침..
                     _visibility = false;
+                    getGoodsListData(); //상품목록 새로고침..
                   });
                   this.focusedDay = focusedDay;
                 },
@@ -200,7 +204,7 @@ class _reserveState extends State<reservePage> {
                 Container(
                     child: Text("조회된 상품 목록이 없습니다.", style: TextStyle(fontSize: 15, color: Color(0xff312B28)), textAlign: TextAlign.center)
                 ) :
-                (!_isTimeLoading) ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : timesList()
+                (!_isTimeLoading) ? CircularProgressIndicator(color: Colors.blue, strokeWidth: 3.0) : timesList()
               )
             ],
           )
@@ -329,11 +333,10 @@ class _reserveState extends State<reservePage> {
           height: 200,
           margin: EdgeInsets.only(left: 3),
           padding: EdgeInsets.all(5),
-          child: Text("위치확인", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             image: DecorationImage(
-              image: AssetImage("asset/images/test1.jpg"),
+              image: Image.memory(testImage[goodsSelected]).image/*as ImageProvider*/,
               fit: BoxFit.fill
             )
           ),
@@ -427,9 +430,17 @@ class _reserveState extends State<reservePage> {
               margin: EdgeInsets.all(6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: (_visibility && timeSelected == index) ? Colors.transparent : ((0 == timesGetList![index]["dayReserve"]) ? Colors.grey : Colors.blue),
+                color: (_visibility && timeSelected == index) ? Color(0xffF7D6AD) : ((0 == timesGetList![index]["dayReserve"]) ? Colors.grey : Color(0xffb47764)),
                 //예약 가능한 수가 0이면 예약 못한다는 표시로 색을 변경한다.
                 border: Border.all(color: Colors.black),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.7),
+                    blurRadius: 5.0,
+                    spreadRadius: 0.0,
+                    offset: const Offset(0,7),
+                  )
+                ]
               ),
               child: Column(
                 children: [
@@ -459,9 +470,17 @@ class _reserveState extends State<reservePage> {
         String responseBody = utf8.decode(response.bodyBytes);
         List<dynamic> goodsList = jsonDecode(responseBody).toList();
         goodsGetList!.addAll(goodsList);
+
+        for (int i=0; goodsList.length > i; i++) {
+          String baseTest = goodsList[i]["productImage"];
+          Uint8List myImage = Uri.parse(baseTest).data!.contentAsBytes();
+          testImage.add(myImage);
+        }
+
         Future.delayed(Duration(milliseconds: 900), () {
           setState(() {
             _isLoading = true;
+            getTimesListData(); //시간 목록 조회
           });
         });
         print("goodsGetList?: ${goodsGetList}");
@@ -577,6 +596,7 @@ class _reserveState extends State<reservePage> {
     final String formatted = formatter.format(now);
 
     Map<String, String> data = {
+      "productCode": goodsGetList[goodsSelected]["productCode"].toString(),
       "reserveDate": formatted.toString(),
       "reserveTime": timesGetList[timeSelected]["dayTime"].toString(),
       "storeCode": widget.data.toString(),

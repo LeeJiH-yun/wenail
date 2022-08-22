@@ -79,7 +79,7 @@ class _myPageState extends State<myPage> {
                 child: Text("예약현황", style: TextStyle(color: Color(0xff312B28), fontSize: 20.0, fontWeight: FontWeight.bold)),
               ),
               Container(
-                padding: EdgeInsets.only(left: 20, right: 20),
+                padding: EdgeInsets.only(left: 10, right: 10),
                 child: /*data!.length == 0 ?
                   Container(
                       child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
