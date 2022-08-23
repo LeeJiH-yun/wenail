@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:convert'; //JSON데이터 사용해서 가져옴
 import 'package:http/http.dart' as http;
+import 'package:wenail/pages/myInfoPage.dart';
 
 class myPage extends StatefulWidget {
   @override
@@ -56,8 +57,13 @@ class _myPageState extends State<myPage> {
                                 child: Text("이지현", style: TextStyle(fontSize: 17.0, color: Color(0xff312B28))),
                               ),
                               SizedBox(height: 10.0),
-                              Container(
-                                child: Text("내정보수정하기", style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff8C8C8C))),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(context,MaterialPageRoute(builder: (context) => myInfoPage()));
+                                },
+                                child: Container(
+                                  child: Text("내정보수정하기", style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff8C8C8C))),
+                                ),
                               )
                             ],
                           ),

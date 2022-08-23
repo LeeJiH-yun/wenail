@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
@@ -56,7 +54,7 @@ class MainHomeState extends State<MainHome> {
   TextEditingController idController = TextEditingController();
   TextEditingController pwController = TextEditingController();
 
-  void _startLoading(codeNum) async {
+  void _startLoading(codeNum, data) async {
     setState(() {
       if (200 == codeNum) { //로그인 성공
         Future.delayed(Duration(milliseconds: 900), () {
@@ -65,7 +63,8 @@ class MainHomeState extends State<MainHome> {
           });
         });
         Future.delayed(Duration(milliseconds: 1000), () {
-          Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+          print("여기얏");
+          Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain(data)));
         });
       }
       else { //로그인 실패
@@ -168,7 +167,7 @@ class MainHomeState extends State<MainHome> {
                     if (_formKey.currentState!.validate()) {
                       var token = await FirebaseMessaging.instance.getToken(); //사용자 토큰값 구하기
                       print("token : ${token ?? 'token NULL!'}");
-                      Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
+                      //Navigator.push(context,MaterialPageRoute(builder: (context) => homeMain()));
                       setState(() {
                         _isLoading = true;
                       });
@@ -226,12 +225,12 @@ class MainHomeState extends State<MainHome> {
   }
 
   Future<String> setLoginData(token) async { //로그인 시도
-    var url = "http://192.168.219.103/api/user/login"; //집와이파이 192.168.219.103
+    var url = "http://192.168.219.103:8080/api/user/login"; //집와이파이 192.168.219.103
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
       "userId": idController.text,
       "userPassword": pwController.text,
-      "token": token.toString()
+      "uidToken": token.toString()
     };
     var bodys = json.encode(data);
 
@@ -245,11 +244,11 @@ class MainHomeState extends State<MainHome> {
     print(response.body);
 
     if (response.statusCode == 200) {
-      _startLoading(200);
+      _startLoading(200, response.body);
       print(response.body);
     }
     else {
-      _startLoading(500);
+      _startLoading(500, response.body);
       print("failed to login");
     }
     return response.body;
