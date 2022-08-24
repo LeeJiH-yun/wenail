@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:wenail/pages/homeMain.dart';
 import 'package:wenail/pages/idSearchPage.dart';
 import 'package:wenail/pages/signUpPage.dart';
@@ -9,9 +8,42 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-void main() async {
+//백그라운드에서 메시지 수신 시
+Future<void> _backGroundMsg(RemoteMessage message) async {
+  print('background message ${message.notification!.body}');
+}
+
+Future<void> firebaseInit() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //Firebase 초기화부터 해야 Firebase Messaging 을 사용할 수 있다.
   await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_backGroundMsg);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  messaging.getToken().then((value) {
+    print("메세지 토큰??"); //받는 사용자 토큰 값 가져오기
+    print(value);
+  });
+
+  //포그라운드에있을 때 들어오는 FCM 페이로드가 수신 될 때 호출되는 스트림을 반환
+  //앱 키고 있을 때 메세지 뜨게
+  FirebaseMessaging.onMessage.listen(
+        (RemoteMessage event) {
+      print("메세지 받는다. message recieved");
+      print(event.notification!.body);
+      showMyDialog(event.notification!);
+    },
+  );
+//Background에서 클릭하여 들어올때 페이지 이동할 곳 여기에 쓰면 될듯
+  FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    print('메세지 클릭 Message clicked!');
+  });
+}
+
+void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp();
+  await firebaseInit();
   // initializeDateFormatting('ko-KR', null); //기본 언어 초기화
   runApp(const MyApp());
 }
@@ -19,7 +51,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -36,8 +67,31 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('ko'),
       home: MainHome(),
+      navigatorKey: navigatorKey, //이거 확실하게 알아보기
     );
   }
+}
+
+//앱 안(포그라운드)에서 푸시를 수신한 경우
+final navigatorKey = GlobalKey<NavigatorState>();
+void showMyDialog(RemoteNotification notification) {
+  showDialog(
+    context: navigatorKey.currentContext!,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(notification.title.toString()),
+        content: Text(notification.body.toString()),
+        actions: [
+          TextButton(
+            child: const Text("Ok"),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      );
+    },
+  );
 }
 
 class MainHome extends StatefulWidget {
@@ -225,7 +279,7 @@ class MainHomeState extends State<MainHome> {
   }
 
   Future<String> setLoginData(token) async { //로그인 시도
-    var url = "http://192.168.219.103:8080/api/user/login"; //집와이파이 192.168.219.103
+    var url = "http://172.30.1.11:8080/api/user/login"; //집와이파이 192.168.219.103
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
       "userId": idController.text,
