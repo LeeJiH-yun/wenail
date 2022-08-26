@@ -40,6 +40,7 @@ dependencies:
   firebase_messaging: ^12.0.1
   flutter_local_notifications: ^9.7.0
   syncfusion_flutter_datepicker: ^20.2.43
+  animated_splash_screen: ^1.3.0
 
 dev_dependencies:
   flutter_test:
@@ -58,7 +59,8 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - asset/images/logo_nail1.png
+    - asset/images/logo_nail.png
+    - asset/images/ic_nail.png
     - asset/images/test1.jpg
     - asset/images/test2.jpg
     - asset/images/test3.jpg

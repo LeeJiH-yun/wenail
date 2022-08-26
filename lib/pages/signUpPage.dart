@@ -1,9 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class signUpPage extends StatefulWidget {
   @override
@@ -18,9 +18,10 @@ class _signUpPageState extends State<signUpPage> {
   TextEditingController idController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   TextEditingController pwChkController = TextEditingController();
-  TextEditingController _DataTimeEditingController = TextEditingController();
 
   String? dateTime;
+  String? testId;
+  int? test;
 
   void printMSG(status) { //회원가입 버튼 눌렀을 때 이벤트처리..
     setState(() {
@@ -127,36 +128,22 @@ class _signUpPageState extends State<signUpPage> {
                       ),
                     ),
                     SizedBox(height: 13.0),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 260,
-                          child: TextFormField(
-                            controller: idController,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "아이디는 필수입니다.";
-                              }
-                              return null;
-                            },
-                            decoration: InputDecoration(
-                                hintText: "* 아이디",
-                                isDense: true,
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.all(10)
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15.0),
-                        ElevatedButton(
-                          onPressed: () => {},
-                          child: Text("중복체크", style: TextStyle(color: Color(0xffF7D6AD))),
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(90, 40),
-                            primary: Colors.brown,
-                          ),
-                        )
-                      ],
+                    TextFormField(
+                      controller: idController,
+                      validator: (value) {
+                        if (value == "test") { //아이디가 겹칠 때
+                          return "이미 존재하는 아이디입니다.";
+                        }
+                        if (value == null || value.isEmpty) {
+                          return "아이디는 필수입니다.";
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                          hintText: "* 아이디",
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.all(10)
+                      ),
                     ),
                     SizedBox(height: 13.0),
                     TextFormField(
@@ -201,6 +188,7 @@ class _signUpPageState extends State<signUpPage> {
                             if (_formKey.currentState!.validate()) {
                               var dateReplace = dateTime?.replaceAll("-", ""); //-를 포함하여 저장되므로 제거해서 생일 데이터를 보내준다.
                               setSignData(dateReplace);
+                              //계정이 있는지 확인 처리 해야함
                             }
                           },
                           child: Text("회원가입")
