@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:wenail/pages/reservePage.dart';
-import 'package:flutter/services.dart';
 import 'dart:convert'; //JSON데이터 사용해서 가져옴
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:wenail/pages/reservePage.dart';
 
 class homePage extends StatefulWidget {
   @override
@@ -186,9 +187,6 @@ class _homePageState extends State<homePage> {
           return Column(
             children: [
               Container(
-                child: Text(storeListData[index]["storeName"], style: TextStyle(fontSize: 20, color: Color(0xff312B28))),
-              ),
-              Container(
                 height: 100,
                 margin: EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -201,8 +199,8 @@ class _homePageState extends State<homePage> {
                 ),
                 child: Container(
                   child: Align(
-                      alignment: Alignment.bottomRight,
-                      child:
+                    alignment: Alignment.center,
+                    child:
                       InkWell(
                         onTap: () {
                             print(storeListData[index]);
@@ -218,7 +216,7 @@ class _homePageState extends State<homePage> {
                               color: Color(0xFF06E4235),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text('예약하러가기', style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
+                            child: Text(storeListData[index]["storeName"], style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
                         ),
                       )
                   )

@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:wenail/pages/homeMain.dart';
 import 'package:wenail/pages/idSearchPage.dart';
 import 'package:wenail/pages/signUpPage.dart';
+import 'package:wenail/service/apiUrl.dart';
 
 //백그라운드에서 메시지 수신 시
 Future<void> _backGroundMsg(RemoteMessage message) async {
@@ -29,8 +30,7 @@ Future<void> firebaseInit() async {
 
   //포그라운드에있을 때 들어오는 FCM 페이로드가 수신 될 때 호출되는 스트림을 반환
   //앱 키고 있을 때 메세지 뜨게
-  FirebaseMessaging.onMessage.listen(
-        (RemoteMessage event) {
+  FirebaseMessaging.onMessage.listen((RemoteMessage event) {
       print("메세지 받는다. message recieved");
       print(event.notification!.body);
       showMyDialog(event.notification!);
@@ -43,10 +43,7 @@ Future<void> firebaseInit() async {
 }
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
   await firebaseInit();
-  // initializeDateFormatting('ko-KR', null); //기본 언어 초기화
   runApp(const MyApp());
 }
 
@@ -68,9 +65,8 @@ class MyApp extends StatelessWidget {
         Locale('ko', 'KO'),
       ],
       locale: const Locale('ko'),
-      //home: MainHome(),
       home: AnimatedSplashScreen(
-        splash: Image.asset('asset/images/ic_nail.png'),
+        splash: Image.asset('asset/images/wenail_logo.png', fit: BoxFit.fitHeight),
         nextScreen: MainHome(),
         splashTransition: SplashTransition.fadeTransition,
         backgroundColor: Colors.white,
@@ -92,7 +88,7 @@ void showMyDialog(RemoteNotification notification) {
         content: Text(notification.body.toString()),
         actions: [
           TextButton(
-            child: const Text("Ok"),
+            child: const Text("확인"),
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -171,7 +167,7 @@ class MainHomeState extends State<MainHome> {
           child: Column(
             children: <Widget>[
               Container(//앱 메인 이미지
-                child: Image.asset('asset/images/logo_nail.png', width: 100, height: 100, fit: BoxFit.fill),
+                child: Image.asset('asset/images/wenail_main.png', width: 100, height: 100, fit: BoxFit.fill),
               ),
               SizedBox(height: 45.0), //사이 공백
               TextFormField( //값을 입력받을 수 있는 폼
@@ -287,7 +283,7 @@ class MainHomeState extends State<MainHome> {
   }
 
   Future<String> setLoginData(token) async { //로그인 시도
-    var url = "http://192.168.219.103:8080/api/user/login"; //집와이파이 192.168.219.103
+    var url = Url().commonUrl + "/api/user/login";
 
     Map<String, String> data = { //입력받은 데이터를 넣는다.
       "userId": idController.text,

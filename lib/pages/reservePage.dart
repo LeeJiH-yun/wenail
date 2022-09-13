@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
-import 'dart:typed_data';
-import 'package:intl/date_symbol_data_local.dart';
 import 'dart:convert'; //JSON데이터 사용해서 가져옴
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class reservePage extends StatefulWidget {
   final String data; //Map형식으로 넘겨줘서 이렇게 선언함
@@ -31,7 +31,7 @@ class _reserveState extends State<reservePage> {
 
   List<dynamic> goodsGetList = [];
   List<dynamic> timesGetList = [];
-  List<dynamic> testImage = [];
+  List<dynamic> goodsImage = [];
 
   int timeSelected = 0, goodsSelected = 0;
   late int weekdayNum;
@@ -130,7 +130,35 @@ class _reserveState extends State<reservePage> {
                           child: Text("일", style: TextStyle(color: Colors.red))
                       );
                     }
-                  }
+                  },
+                  selectedBuilder: (context, date, events) => Container( // 선택된 날짜 꾸미기
+                    margin: const EdgeInsets.all(6.0),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Color(0xffF7D6AD),
+                      borderRadius: BorderRadius.circular(60.0),
+                    ),
+                    child: Text(
+                      date.day.toString(),
+                      style: TextStyle(
+                        //fontFamily: 'Montserrat',
+                        //fontWeight: FontWeight.w600,
+                        //fontSize: 12,
+                        color: const Color(0xff000000),
+                      ),
+                    ),
+                  ),
+                  todayBuilder: (context, date, events) => Container(
+                    margin: const EdgeInsets.all(6.0),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Color(0xfffae8d1),
+                      borderRadius: BorderRadius.circular(60.0)),
+                    child: Text(
+                      date.day.toString(),
+                      style: TextStyle(color: Color(0xff000000)),
+                    )
+                  ),
                 ),
                 calendarStyle: CalendarStyle(
                   outsideDaysVisible: false //현재 월의 달력만 보여준다.
@@ -312,7 +340,7 @@ class _reserveState extends State<reservePage> {
                   Column(
                     children: [
                       Text(goodsGetList![index]["productTitle"],style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
-                      Text(goodsGetList![index]["productPrice"].toString(), style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
+                      Text(goodsGetList![index]["productPrice"].toString() + "원", style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
                     ]
                   )
               )
@@ -336,7 +364,7 @@ class _reserveState extends State<reservePage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             image: DecorationImage(
-              image: Image.memory(testImage[goodsSelected]).image/*as ImageProvider*/,
+              image: Image.memory(goodsImage[goodsSelected]).image/*as ImageProvider*/,
               fit: BoxFit.fill
             )
           ),
@@ -474,7 +502,7 @@ class _reserveState extends State<reservePage> {
         for (int i=0; goodsList.length > i; i++) {
           String baseTest = goodsList[i]["productImage"];
           Uint8List myImage = Uri.parse(baseTest).data!.contentAsBytes();
-          testImage.add(myImage);
+          goodsImage.add(myImage);
         }
 
         Future.delayed(Duration(milliseconds: 900), () {
@@ -600,7 +628,7 @@ class _reserveState extends State<reservePage> {
       "reserveDate": formatted.toString(),
       "reserveTime": timesGetList[timeSelected]["dayTime"].toString(),
       "storeCode": widget.data.toString(),
-      "userId": "lsh",
+      "userId": "test", //로그인한 아이디를 넣어주도록 처리한다.
     };
     var bodys = json.encode(data);
 
