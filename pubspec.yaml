@@ -60,7 +60,6 @@ dev_dependencies:
 flutter:
   assets:
     - asset/images/logo_nail.png
-    - asset/images/ic_nail.png
     - asset/images/test1.jpg
     - asset/images/test2.jpg
     - asset/images/test3.jpg
