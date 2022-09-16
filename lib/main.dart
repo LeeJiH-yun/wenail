@@ -56,6 +56,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, //우측 상단의 디버그 표시를 없앤다.
       theme: ThemeData(
         primarySwatch: Colors.brown,
+        fontFamily: 'Spoqa'
       ),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,

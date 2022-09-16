@@ -1,8 +1,10 @@
+import 'dart:convert'; //JSON데이터 사용해서 가져옴
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:convert'; //JSON데이터 사용해서 가져옴
 import 'package:http/http.dart' as http;
 import 'package:wenail/pages/myInfoPage.dart';
+import 'package:wenail/service/apiUrl.dart';
 
 class myPage extends StatefulWidget {
   @override
@@ -20,6 +22,14 @@ class _myPageState extends State<myPage> {
   ];
   DateTime? currentBackPressTime;
   List data = [];
+  bool _isLoading = false; //로딩 여부
+  List<dynamic> userReserveList = []; //사용자 예약 현황
+
+  // @override
+  void initState() {
+    super.initState();
+    getUserReserve(); //사용자 예약현황 api 호출
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +96,13 @@ class _myPageState extends State<myPage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 10, right: 10),
-                child: /*data!.length == 0 ?
+                child: userReserveList!.length == 0 ?
                   Container(
                       child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
-                  ) :*/
+                  ) :
                   ListView.builder(
                     shrinkWrap: true,
-                    itemCount: reserveArray.length,
+                    itemCount: userReserveList.length,
                     itemBuilder: (context, index) {
                       return Container(
                         height: 40,
@@ -107,7 +117,7 @@ class _myPageState extends State<myPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                child: Text(reserveArrayT[index]),
+                                child: Text(userReserveList[index]["productTitle"]),
                               ),
                               Container(
                                 child: Align(
@@ -220,15 +230,65 @@ class _myPageState extends State<myPage> {
     return true;
   }
 
-  Future<String> getJSONData() async { //검색했을 때 데이터가 조회되도록
-    var url = "내로컬주소로 해야하나 rest주소로 해야하나 ? target=store&query=userNo";
-    var response = await http.get(Uri.parse(url));
+  void getUserReserve() async { //사용자 예약 현황
+    var url = Url().commonUrl + "/api/user/reserve?userId=test"; //${}
 
-    setState(() {
-      var dataConvertedToJSON = json.decode(response.body);
-      List result = dataConvertedToJSON["document"];
-      data!.addAll(result);
-    });
-    return response.body;
+    var response = await http.get(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    );
+
+    if (response.statusCode == 200) {
+      print("여기");
+      setState(() {
+        userReserveList = []; //초기화
+        String responseBody = utf8.decode(response.bodyBytes);
+        List<dynamic> reserveCurrentList = jsonDecode(responseBody).toList();
+        userReserveList!.addAll(reserveCurrentList);
+
+        print("userReserveList?: ${userReserveList}");
+        print("responseBody?: ${response.body}");
+      });
+    }
+    else {
+      print("여긴가?");
+      setState(() {
+        _isLoading = true;
+      });
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text("데이터 조회에 실패했습니다.\n다시 시도해주세요.", textAlign: TextAlign.center),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              backgroundColor: Colors.white,
+              actions: [
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        child: Text("취소"),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text("확인"),
+                        onPressed: () {
+                          Navigator.of(context).pop();;
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            );
+          }
+      );
+      throw "서버 연결이 끊겼습니다.\n다시 시도해주세요.";
+    }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:wenail/pages/reservePage.dart';
+import 'package:wenail/service/apiUrl.dart';
 
 class homePage extends StatefulWidget {
   @override
@@ -230,7 +231,8 @@ class _homePageState extends State<homePage> {
   }
 
   void getListData() async { //검색했을 때 데이터가 조회되도록
-    var url = "http://192.168.219.103:8080/api/store/list?store=${_editingController.text}";
+    var url = Url().commonUrl + "/api/store/list?store=${_editingController.text}";
+
     var response = await http.get(
       Uri.parse(url),
       headers: <String, String>{

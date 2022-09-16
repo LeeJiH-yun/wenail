@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:wenail/service/apiUrl.dart';
 
 class signUpPage extends StatefulWidget {
   @override
@@ -202,7 +203,7 @@ class _signUpPageState extends State<signUpPage> {
   }
 
   Future<String> setSignData(date) async { //회원가입 데이터 보내기
-    var url = "http://192.168.219.103:8080/api/user/save";
+    var url = Url().commonUrl + "/api/user/save";
 
     Map<String, String> data = {
       "birthDate": date,

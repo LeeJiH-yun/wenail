@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wenail/service/apiUrl.dart';
 
 class reservePage extends StatefulWidget {
   final String data; //Map형식으로 넘겨줘서 이렇게 선언함
@@ -170,7 +171,6 @@ class _reserveState extends State<reservePage> {
                 onDaySelected: (DateTime selectedDay, DateTime focusedDay) {
                   setState(() {
                     print("넘어온 데이터 확인" + widget.data);
-
                     //선택된 날짜의 상태를 갱신한다.
                     this.selectedDay = selectedDay;
                     if (selectedDay != this.focusedDay || (selectedDay == this.focusedDay) && _timeVisibility || (selectedDay == this.focusedDay) && _goodsVisibility) {
@@ -248,17 +248,20 @@ class _reserveState extends State<reservePage> {
                     margin: EdgeInsets.only(bottom: 10, right: 5),
                     child: InkWell(
                       onTap: () {
-                        setReserveData();
+                        //Navigator.push();
+                        reserveConfirm();
+                        //Navigator.push(context, MaterialPageRoute(builder: (context) => reserveConfirmPage()));
+                        //setReserveData();
                       },
                       child: Container(
-                          height: 30,
-                          width: 100,
-                          padding: EdgeInsets.only(top: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.brown,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text('예약하기', style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
+                        height: 30,
+                        width: 100,
+                        padding: EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.brown,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('예약하기', style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
                       ),
                     )
                 )
@@ -297,7 +300,7 @@ class _reserveState extends State<reservePage> {
   Container goodsList() {//상품 목록
     return Container(
         margin: EdgeInsets.all(10),
-        height: 80,
+        height: 90,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: goodsGetList.length,
@@ -340,6 +343,10 @@ class _reserveState extends State<reservePage> {
                   Column(
                     children: [
                       Text(goodsGetList![index]["productTitle"],style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+                      Divider(
+                        thickness: 1,
+                        color: Colors.grey,
+                      ),
                       Text(goodsGetList![index]["productPrice"].toString() + "원", style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
                     ]
                   )
@@ -372,10 +379,17 @@ class _reserveState extends State<reservePage> {
         Container(
           width: 200,
           height: 200,
-          color: Colors.pink,
           margin: EdgeInsets.only(right: 3),
           padding: EdgeInsets.all(5),
-          child: Text(_goodsVisibility && _timeVisibility ? goodsGetList![goodsSelected]["productContent"] : "상품을 선택해주세요.", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Color(0xff666666)
+            )
+          ),
+          child: SingleChildScrollView( //스크롤 넣기
+            child: Text(_goodsVisibility && _timeVisibility ? goodsGetList![goodsSelected]["productContent"] : "상품을 선택해주세요.", style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.left),
+          )
         )
       ],
     );
@@ -458,7 +472,7 @@ class _reserveState extends State<reservePage> {
               margin: EdgeInsets.all(6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: (_visibility && timeSelected == index) ? Color(0xffF7D6AD) : ((0 == timesGetList![index]["dayReserve"]) ? Colors.grey : Color(0xffb47764)),
+                color: (_visibility && timeSelected == index) ? Color(0xffF7D6AD) : ((0 == timesGetList![index]["dayReserve"]) ? Color(0xffD5D5D5) : Color(0xffb47764)),
                 //예약 가능한 수가 0이면 예약 못한다는 표시로 색을 변경한다.
                 border: Border.all(color: Colors.black),
                 boxShadow: [
@@ -473,7 +487,6 @@ class _reserveState extends State<reservePage> {
               child: Column(
                 children: [
                   Text(timesGetList[index]["dayTime"].toString() + ":", style: TextStyle(fontSize: 20.0, height: 1.6), textAlign: TextAlign.center),
-                  Text(timesGetList![index]["dayReserve"].toString(), style: TextStyle(fontSize: 17.0, height: 1.6), textAlign: TextAlign.center)
                 ]
               )
             )
@@ -483,13 +496,43 @@ class _reserveState extends State<reservePage> {
     );
   }
 
+  void reserveConfirm() { //예약 확인 안내창
+    setState(() {
+      showDialog(
+        context: context,
+        barrierDismissible: false, //Dialog를 제외한 다른 화면 터치 x
+        builder: (BuildContext context) {
+          return AlertDialog(
+            // RoundedRectangleBorder - Dialog 화면 모서리 둥글게 조절
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("테스트")
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text("예약신청"),
+                onPressed: () {
+                  setReserveData();
+                },
+              ),
+            ],
+          );
+        });
+    });
+  }
+  
   void getGoodsListData() async { //상품 목록 조회
-    var url = "http://192.168.219.103:8080/api/product/list?storeCode=${widget.data}"; //192.168.219.103
+    var url = Url().commonUrl + "/api/product/list?storeCode=${widget.data}";
+
     var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-type': 'application/json; charset=UTF-8'
-        }
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-type': 'application/json; charset=UTF-8'
+      }
     );
 
     if (response.statusCode == 200) {
@@ -555,7 +598,7 @@ class _reserveState extends State<reservePage> {
   }
 
   void getTimesListData() async { //시간 목록 조회
-    var url = "http://192.168.219.103:8080/api/reserve/day/${weekdayNum}?storeCode=${widget.data}"; //192.168.219.103
+    var url = Url().commonUrl + "/api/reserve/day/${weekdayNum}?storeCode=${widget.data}";
     var response = await http.get(
       Uri.parse(url),
       headers: <String, String>{
@@ -618,7 +661,7 @@ class _reserveState extends State<reservePage> {
   }
 
   Future<String> setReserveData() async { //예약하기
-    var url = "http://192.168.219.103:8080/api/reserve/";
+    var url = Url().commonUrl + "/api/reserve/";
     final DateTime now = selectedDay; //selectedDay는 시간까지 출력해서 값을 변경시키기 위함
     final DateFormat formatter = DateFormat('yyyyMMdd');
     final String formatted = formatter.format(now);
