@@ -37,6 +37,8 @@ class _reserveState extends State<reservePage> {
   int timeSelected = 0, goodsSelected = 0;
   late int weekdayNum;
 
+  String formatted = "";
+
   // @override
   void initState() {
     super.initState();
@@ -44,6 +46,10 @@ class _reserveState extends State<reservePage> {
     getGoodsListData(); //상품목록 api 호출
     _goodsVisibility = true; //맨처음 들어왔을 때 맨처음 것이 디폴트로 보이게 할거라.. 일단 넣어봄ㅅ
     _timeVisibility = true;
+
+    final DateTime now = selectedDay; //selectedDay는 시간까지 출력해서 값을 변경시키기 위함
+    final DateFormat formatter = DateFormat('yyyyMMdd');
+    formatted = formatter.format(now);
   }
 
   void printMSG(status) {
@@ -58,12 +64,12 @@ class _reserveState extends State<reservePage> {
               backgroundColor: Colors.white,
               actions: [
                 Center(
-                    child: TextButton(
-                      child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
-                      onPressed: () {
-                        Navigator.of(context).pop(); Navigator.of(context).pop();
-                      },
-                    )
+                  child: TextButton(
+                    child: Text("확인", style: TextStyle(color: Color(0xff312B28))),
+                    onPressed: () {
+                      Navigator.of(context).pop(); Navigator.of(context).pop();
+                    },
+                  )
                 )
               ],
             );
@@ -500,16 +506,62 @@ class _reserveState extends State<reservePage> {
     setState(() {
       showDialog(
         context: context,
-        barrierDismissible: false, //Dialog를 제외한 다른 화면 터치 x
+        //barrierDismissible: false, //Dialog를 제외한 다른 화면 터치 x
         builder: (BuildContext context) {
           return AlertDialog(
             // RoundedRectangleBorder - Dialog 화면 모서리 둥글게 조절
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            //insetPadding: EdgeInsets.all(5),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("테스트")
+                Center(
+                  child: Icon(Icons.check_circle, size: 45.0, color: Color(0xffF7D6AD)),
+                ),
+                SizedBox(height: 13.0),
+                Text("현재 예약을 확인 중입니다."),
+                Text("예약 확정시,\n알림이 발송됩니다.", style: TextStyle(fontSize: 15.0)),
+                Divider(
+                  thickness: 1,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 13.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("이름"),
+                    Text("test"),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("상품명"),
+                    Text(goodsGetList[goodsSelected]["productTitle"].toString()),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("가격"),
+                    Text(goodsGetList[goodsSelected]["productPrice"].toString() + "원"),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("예약날짜"),
+                    Text(formatted.toString()),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("예약시간"),
+                    Text(timesGetList[timeSelected]["dayTime"].toString()),
+                  ],
+                ),
               ],
             ),
             actions: [
@@ -662,9 +714,6 @@ class _reserveState extends State<reservePage> {
 
   Future<String> setReserveData() async { //예약하기
     var url = Url().commonUrl + "/api/reserve/";
-    final DateTime now = selectedDay; //selectedDay는 시간까지 출력해서 값을 변경시키기 위함
-    final DateFormat formatter = DateFormat('yyyyMMdd');
-    final String formatted = formatter.format(now);
 
     Map<String, String> data = {
       "productCode": goodsGetList[goodsSelected]["productCode"].toString(),
@@ -680,7 +729,7 @@ class _reserveState extends State<reservePage> {
       headers: <String, String> {
         'Content-type' : 'application/json; charset=UTF-8'
       },
-      body: bodys
+      //body: bodys
     );
 
     if (response.statusCode == 200) {

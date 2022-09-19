@@ -7,6 +7,9 @@ import 'package:wenail/pages/reservePage.dart';
 import 'package:wenail/service/apiUrl.dart';
 
 class homePage extends StatefulWidget {
+  //final String data; //Map형식으로 넘겨줘서 이렇게 선언함
+  //const homePage(this.data); //넘어온 데이터 사용
+
   @override
   _homePageState createState() => _homePageState();
 }

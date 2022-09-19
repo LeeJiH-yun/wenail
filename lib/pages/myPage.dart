@@ -64,7 +64,7 @@ class _myPageState extends State<myPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                child: Text("이지현", style: TextStyle(fontSize: 17.0, color: Color(0xff312B28))),
+                                child: Text(userReserveList[0]["userName"], style: TextStyle(fontSize: 17.0, color: Color(0xff312B28))),
                               ),
                               SizedBox(height: 10.0),
                               InkWell(
