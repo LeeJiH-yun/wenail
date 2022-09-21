@@ -105,37 +105,75 @@ class _myPageState extends State<myPage> {
                     itemCount: userReserveList.length,
                     itemBuilder: (context, index) {
                       return Container(
-                        height: 40,
+                        height: 95,
                         margin: EdgeInsets.only(top: 10),
                         decoration: BoxDecoration(
                           color: Color(0xffD5D5D5),
                           borderRadius: BorderRadius.circular(13),
                         ),
                         child: Container(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                child: Text(userReserveList[index]["productTitle"]),
-                              ),
-                              Container(
-                                child: Align(
-                                  alignment: Alignment.centerRight,
-                                  child: InkWell(
-                                    onTap: (){
-                                      alarmMsg("예약을 취소하겠습니까?", "RC");
-                                    },
-                                    child: Container(
-                                      height: 35,
-                                      padding: EdgeInsets.all(8),
-                                      child: Text('취소하기', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
+                          padding: EdgeInsets.all(8),
+                          child: 
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      child: Text("가게명:"),
                                     ),
-                                  )
-                                )
-                              )
-                            ],
-                          ),
+                                    Container(
+                                      child: Text("안산중앙네일"),
+                                    ),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 30),
+                                      child: Text("희망예약일:"),
+                                    ),
+                                    Container(
+                                      child: Text("2022-09-21"),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      child: Text("예약상품:"),
+                                    ),
+                                    Container(
+                                      child: Text(userReserveList[index]["productTitle"]),
+                                    ),
+                                    Container(
+                                        child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: InkWell(
+                                              onTap: (){
+                                                alarmMsg("예약을 취소하겠습니까?", "RC");
+                                              },
+                                              child: Container(
+                                                height: 35,
+                                                padding: EdgeInsets.all(8),
+                                                child: Text('취소하기', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
+                                              ),
+                                            )
+                                        )
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      child: Text("[" + userReserveList[index]["reserveStatus"] + "]"),
+                                    ),
+                                    Container(
+                                      child: Text("예약신청일:"),
+                                    ),
+                                    Container(
+                                      child: Text("2022-09-20"),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                         )
                       );
                     }
@@ -241,7 +279,6 @@ class _myPageState extends State<myPage> {
     );
 
     if (response.statusCode == 200) {
-      print("여기");
       setState(() {
         userReserveList = []; //초기화
         String responseBody = utf8.decode(response.bodyBytes);
@@ -253,7 +290,6 @@ class _myPageState extends State<myPage> {
       });
     }
     else {
-      print("여긴가?");
       setState(() {
         _isLoading = true;
       });
