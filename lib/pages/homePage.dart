@@ -213,14 +213,14 @@ class _homePageState extends State<homePage> {
                           );
                         },
                         child: Container(
-                            height: 30,
-                            width: 100,
-                            padding: EdgeInsets.only(top: 8),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF06E4235),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(storeListData[index]["storeName"], style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
+                          height: 30,
+                          width: 100,
+                          padding: EdgeInsets.only(top: 8),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF06E4235),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(storeListData[index]["storeName"], style: TextStyle(color: Color(0xffF7D6AD)), textAlign: TextAlign.center)
                         ),
                       )
                   )

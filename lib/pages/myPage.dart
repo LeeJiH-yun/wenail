@@ -23,6 +23,7 @@ class _myPageState extends State<myPage> {
   DateTime? currentBackPressTime;
   List data = [];
   bool _isLoading = false; //로딩 여부
+
   List<dynamic> userReserveList = []; //사용자 예약 현황
 
   // @override
@@ -94,91 +95,7 @@ class _myPageState extends State<myPage> {
                 height: 50,
                 child: Text("예약현황", style: TextStyle(color: Color(0xff312B28), fontSize: 20.0, fontWeight: FontWeight.bold)),
               ),
-              Container(
-                padding: EdgeInsets.only(left: 10, right: 10),
-                child: userReserveList!.length == 0 ?
-                  Container(
-                      child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
-                  ) :
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: userReserveList.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        height: 95,
-                        margin: EdgeInsets.only(top: 10),
-                        decoration: BoxDecoration(
-                          color: Color(0xffD5D5D5),
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          child: 
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      child: Text("가게명:"),
-                                    ),
-                                    Container(
-                                      child: Text("안산중앙네일"),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 30),
-                                      child: Text("희망예약일:"),
-                                    ),
-                                    Container(
-                                      child: Text("2022-09-21"),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      child: Text("예약상품:"),
-                                    ),
-                                    Container(
-                                      child: Text(userReserveList[index]["productTitle"]),
-                                    ),
-                                    Container(
-                                        child: Align(
-                                            alignment: Alignment.centerRight,
-                                            child: InkWell(
-                                              onTap: (){
-                                                alarmMsg("예약을 취소하겠습니까?", "RC");
-                                              },
-                                              child: Container(
-                                                height: 35,
-                                                padding: EdgeInsets.all(8),
-                                                child: Text('취소하기', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
-                                              ),
-                                            )
-                                        )
-                                    )
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      child: Text("[" + userReserveList[index]["reserveStatus"] + "]"),
-                                    ),
-                                    Container(
-                                      child: Text("예약신청일:"),
-                                    ),
-                                    Container(
-                                      child: Text("2022-09-20"),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                        )
-                      );
-                    }
-                  )
-                )
+              !_isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : reserveList(),
             ]
           )
         )
@@ -254,6 +171,104 @@ class _myPageState extends State<myPage> {
     );
   }
 
+  Container reserveList() {
+    return Container(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: userReserveList!.length == 0 ?
+      Container(
+          child: Text("예약내역이 없습니다.", style: TextStyle(fontSize: 20, color: Color(0xffD5D5D5)), textAlign: TextAlign.center)
+      ) :
+      ListView.builder(
+        shrinkWrap: true,
+        physics : NeverScrollableScrollPhysics(), //스크롤이 안되길래 추가함
+        itemCount: userReserveList.length,
+        itemBuilder: (context, index) {
+          return Container(
+            height: 119,
+            margin: EdgeInsets.only(top: 10),
+            decoration: BoxDecoration(
+              color: Color(0xffD5D5D5),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Container(
+                padding: EdgeInsets.all(8),
+                child:
+                Row(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              child: Text("가게명:"),
+                            ),
+                            Container(
+                              child: Text("안산중앙네일"),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5.0),
+                        Row(
+                          children: [
+                            Container(
+                              child: Text("희망예약일:"),
+                            ),
+                            Container(
+                              child: Text(userReserveList[index]["reserveDate"]),
+                            ),
+                          ]
+                        ),
+                        SizedBox(height: 5.0),
+                        Row(
+                          children: [
+                            Container(
+                              child: Text("예약상품:"),
+                            ),
+                            Container(
+                              child: Text(userReserveList[index]["productTitle"]),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 5.0),
+                        Row(
+                          children: [
+                            Container(
+                              child: Text("[" + userReserveList[index]["reserveStatus"] + "]", style: TextStyle(color: Color(0xff555555))),
+                            ),
+                            Container(
+                              child: Text("예약신청일:"),
+                            ),
+                            Container(
+                              child: Text(userReserveList[index]["createDate"], style: TextStyle(fontSize: 14.0)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Align(
+                        alignment: Alignment.centerRight,
+                        child: InkWell(
+                          onTap: (){
+                            alarmMsg("예약을 취소하겠습니까?", "RC");
+                          },
+                          child: Container(
+                            height: 35,
+                            padding: EdgeInsets.all(8),
+                            child: Text('취소', style: TextStyle(fontSize: 17.0, decoration: TextDecoration.underline, color: Color(0xff5D5D5D))),
+                          ),
+                        )
+                    )
+                  ],
+                )
+            )
+          );
+        }
+      )
+    );
+  }
+
   Future<bool> onWillPop() async {
     DateTime now = DateTime.now();
 
@@ -284,9 +299,12 @@ class _myPageState extends State<myPage> {
         String responseBody = utf8.decode(response.bodyBytes);
         List<dynamic> reserveCurrentList = jsonDecode(responseBody).toList();
         userReserveList!.addAll(reserveCurrentList);
-
+        Future.delayed(Duration(milliseconds: 900), () {
+          setState(() {
+            _isLoading = true;
+          });
+        });
         print("userReserveList?: ${userReserveList}");
-        print("responseBody?: ${response.body}");
       });
     }
     else {
@@ -294,35 +312,35 @@ class _myPageState extends State<myPage> {
         _isLoading = true;
       });
       showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: Text("데이터 조회에 실패했습니다.\n다시 시도해주세요.", textAlign: TextAlign.center),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-              backgroundColor: Colors.white,
-              actions: [
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        child: Text("취소"),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      TextButton(
-                        child: Text("확인"),
-                        onPressed: () {
-                          Navigator.of(context).pop();;
-                        },
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            );
-          }
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text("데이터 조회에 실패했습니다.\n다시 시도해주세요.", textAlign: TextAlign.center),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+            backgroundColor: Colors.white,
+            actions: [
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: Text("취소"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    TextButton(
+                      child: Text("확인"),
+                      onPressed: () {
+                        Navigator.of(context).pop();;
+                      },
+                    ),
+                  ],
+                ),
+              )
+            ],
+          );
+        }
       );
       throw "서버 연결이 끊겼습니다.\n다시 시도해주세요.";
     }
