@@ -3,6 +3,7 @@ import 'dart:convert'; //JSON데이터 사용해서 가져옴
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:wenail/pages/reservePage.dart';
 import 'package:wenail/service/apiUrl.dart';
 
@@ -17,20 +18,13 @@ class homePage extends StatefulWidget {
 class _homePageState extends State<homePage> {
   DateTime? currentBackPressTime;
 
-  List <String>iconList = [
-    'asset/images/test1.jpg',
-    'asset/images/test2.jpg',
-    'asset/images/test3.jpg',
-    'asset/images/test4.jpg',
-    'asset/images/test5.jpg',
-    'asset/images/test6.jpg',
-  ];
   List<dynamic> storeListData = [];
   List<Map> data = [
     {"STORE" : "안산 뷰티네일샵", "STORE_CODE" : "WN0002", "image": "asset/images/test1.jpg"},
     {"STORE" : "안산 뷰티네일샵test", "STORE_CODE" : "WN000133", "image": "asset/images/test2.jpg"}
   ];
   TextEditingController _editingController = TextEditingController();
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   bool _isLoading = false; //로딩 여부
 
@@ -40,14 +34,23 @@ class _homePageState extends State<homePage> {
     getListData(); //가게 목록 api 호출
   }
 
+  void _onRefresh() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    print("새로고침..");
+    _refreshController.refreshCompleted();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky); // 상태바 숨기기
     return WillPopScope( //메인화면에서 뒤로가기시 로그인화면으로 이동되는 것을 방지
       onWillPop: onWillPop,
       child: Scaffold(
-        body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
+        body: SmartRefresher(
+          enablePullDown: true,
+          header: WaterDropHeader(),
+          controller: _refreshController,
+          onRefresh: _onRefresh,
           child: Column(
             children: <Widget>[
               appTitle(),
@@ -59,35 +62,35 @@ class _homePageState extends State<homePage> {
               ),
               SizedBox(height: 15.0),
               Container(
-                padding: EdgeInsets.only(left: 20, right: 20),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 310,
-                      child: TextField(
-                        controller: _editingController,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          hintText: "네일샵 검색",
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.all(8)
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 310,
+                        child: TextField(
+                          controller: _editingController,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              hintText: "네일샵 검색",
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.all(8)
+                          ),
                         ),
                       ),
-                    ),
-                    InkWell(
-                      onTap: () async {
-                        setState(() {
-                          _isLoading = false;
-                          getListData();
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(left: 15),
-                        child: Icon(Icons.search, size: 45.0),
+                      InkWell(
+                          onTap: () async {
+                            setState(() {
+                              _isLoading = false;
+                              getListData();
+                            });
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(left: 15),
+                            child: Icon(Icons.search, size: 45.0),
+                          )
                       )
-                    )
-                  ],
-                )
+                    ],
+                  )
               ),
               SizedBox(height: 13.0),
               Divider(
@@ -97,9 +100,62 @@ class _homePageState extends State<homePage> {
               !_isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : storeList(),
             ]
           )
+        )
+
+        // body: SingleChildScrollView(
+        //   scrollDirection: Axis.vertical,
+        //   child: Column(
+        //     children: <Widget>[
+        //       appTitle(),
+        //       Container(//앱 메인 이미지
+        //         width: MediaQuery.of(context).size.width,
+        //         height: 100,
+        //         color: Colors.grey,
+        //         child: Text("광고란"),
+        //       ),
+        //       SizedBox(height: 15.0),
+        //       Container(
+        //         padding: EdgeInsets.only(left: 20, right: 20),
+        //         child: Row(
+        //           children: [
+        //             SizedBox(
+        //               width: 310,
+        //               child: TextField(
+        //                 controller: _editingController,
+        //                 keyboardType: TextInputType.text,
+        //                 decoration: InputDecoration(
+        //                   hintText: "네일샵 검색",
+        //                   border: OutlineInputBorder(),
+        //                   contentPadding: EdgeInsets.all(8)
+        //                 ),
+        //               ),
+        //             ),
+        //             InkWell(
+        //               onTap: () async {
+        //                 setState(() {
+        //                   _isLoading = false;
+        //                   getListData();
+        //                 });
+        //               },
+        //               child: Container(
+        //                 margin: EdgeInsets.only(left: 15),
+        //                 child: Icon(Icons.search, size: 45.0),
+        //               )
+        //             )
+        //           ],
+        //         )
+        //       ),
+        //       SizedBox(height: 13.0),
+        //       Divider(
+        //         thickness: 1,
+        //         color: Colors.grey,
+        //       ),
+        //       !_isLoading ? CircularProgressIndicator(color: Color(0xffF7D6AD), strokeWidth: 3.0) : storeList(),
+        //     ]
+        //   )
         ),
-      )
-    );
+      );
+    //);
   }
 
   Container appTitle() {//앱 타이틀
